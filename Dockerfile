@@ -30,8 +30,8 @@ COPY frontend/static ./static
 # Crear directorio para datos persistentes
 RUN mkdir -p /app/data
 
-# Exponer puerto 80
-EXPOSE 80
+# Exponer puerto 8000
+EXPOSE 8000
 
 # Variables de entorno
 ENV FLASK_ENV=production
