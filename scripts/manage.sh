@@ -4,7 +4,7 @@
 
 CONTAINER_NAME="${2:-vocational-test-container}"
 IMAGE_NAME="${3:-vocational-test:latest}"
-PORT="${4:-8000}"
+PORT="${4:-80}"
 APP_PATH="/mnt/tesis_data/codigo/vocational_test"
 
 case "$1" in
