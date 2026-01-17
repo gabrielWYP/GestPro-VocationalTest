@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 import sqlite3
 
 app = Flask(__name__)
-app.config['DATABASE'] = 'vocational_test.db'
+# Usar variable de entorno para la base de datos (útil para Docker)
+app.config['DATABASE'] = os.environ.get('DATABASE_PATH', 'vocational_test.db')
 
 # Inicializar base de datos
 def init_db():

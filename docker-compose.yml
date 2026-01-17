@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  vocational-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Plataformas soportadas (descomentar según necesidad)
+      # platforms:
+      #   - linux/amd64
+      #   - linux/arm64
+    ports:
+      - "80:80"
+    container_name: vocational-test-app
+    restart: unless-stopped
+    volumes:
+      - vocational_data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_PATH=/app/data/vocational_test.db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:80')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  vocational_data:
+    driver: local
