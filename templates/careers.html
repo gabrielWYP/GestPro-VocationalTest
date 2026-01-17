@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carreras Disponibles - Test de Orientación Vocacional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🎯 Vocational Test</div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Carreras Disponibles</h1>
+            <p>Explora las 8 carreras principales recomendadas por nuestro sistema</p>
+        </div>
+    </section>
+
+    <section class="careers-section">
+        <div class="container">
+            <div class="careers-grid">
+                {% for career in careers %}
+                <div class="career-card">
+                    <div class="career-icon">{{ career.icon }}</div>
+                    <h3>{{ career.name }}</h3>
+                    <p class="career-description">{{ career.description }}</p>
+                    <div class="skills">
+                        <h4>Habilidades Clave:</h4>
+                        <ul>
+                            {% for skill in career.skills %}
+                            <li>{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>¿Listo para descubrir tu carrera ideal?</h2>
+            <a href="/test" class="btn btn-primary">Hacer el Test</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+            <p>Ayudándote a encontrar tu camino profesional 🚀</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Orientación Vocacional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🎯 Vocational Test</div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="test-section">
+        <div class="container">
+            <div id="test-container">
+                <div id="intro" class="test-intro">
+                    <h1>Test de Orientación Vocacional</h1>
+                    <p>Responde las siguientes {{ total }} preguntas con honestidad y sinceridad.</p>
+                    <p>Esto te llevará aproximadamente 5 minutos.</p>
+                    
+                    <div class="user-info">
+                        <div class="form-group">
+                            <label for="name">Nombre Completo *</label>
+                            <input type="text" id="name" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" placeholder="tu@email.com" required>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startTest()" class="btn btn-primary">Comenzar Test</button>
+                </div>
+
+                <div id="questions" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progress" class="progress-fill"></div>
+                    </div>
+                    <div id="question-container"></div>
+                </div>
+
+                <div id="results" style="display: none;">
+                    <div class="results-container">
+                        <h2>Tu Resultado</h2>
+                        <div id="result-career" class="result-career"></div>
+                        <div id="result-scores" class="result-scores"></div>
+                        <div class="result-actions">
+                            <a href="/advisory" class="btn btn-primary">Agendar Asesoría</a>
+                            <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Datos del test embebidos para acceso desde JavaScript -->
+    <script type="application/json" id="questionsData">{{ questions | safe }}</script>
+
+    <!-- Scripts externos -->
+    <script src="{{ url_for('static', filename='js/test.js') }}"></script>
+</body>
+</html>

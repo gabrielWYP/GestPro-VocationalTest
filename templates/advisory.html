@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Asesoría - Test de Orientación Vocacional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🎯 Vocational Test</div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="advisory-section">
+        <div class="container">
+            <h1>Agendar Asesoría Vocacional</h1>
+            <p class="subtitle">Habla con nuestros orientadores profesionales para profundizar en tu decisión</p>
+            
+            <div class="advisory-container">
+                <div class="advisory-info">
+                    <h2>¿Por qué agendar una asesoría?</h2>
+                    <ul class="benefits">
+                        <li>✓ Análisis personalizado de tus resultados</li>
+                        <li>✓ Orientación profesional de expertos</li>
+                        <li>✓ Descubrimiento de oportunidades educativas</li>
+                        <li>✓ Respuestas a todas tus dudas</li>
+                        <li>✓ Plan de acción personalizado</li>
+                    </ul>
+                    <p class="duration"><strong>Duración:</strong> 45 minutos</p>
+                    <p class="price"><strong>Costo:</strong> Gratis para nuestros usuarios</p>
+                </div>
+
+                <div class="advisory-form-container">
+                    <form id="advisoryForm" class="advisory-form">
+                        <div class="form-group">
+                            <label for="name">Nombre Completo *</label>
+                            <input type="text" id="name" name="name" required placeholder="Tu nombre">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Fecha Preferida *</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="time">Hora Preferida *</label>
+                            <select id="time" name="time" required>
+                                <option value="">Selecciona una hora</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Agendar Asesoría</button>
+                    </form>
+
+                    <div id="successMessage" style="display: none;" class="success-message">
+                        <h3>¡Asesoría Agendada Exitosamente! ✓</h3>
+                        <p id="successText"></p>
+                        <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="available-slots">
+                <h3>Próximas Fechas Disponibles</h3>
+                <div id="availableDates" class="dates-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Datos de slots reservados embebidos para acceso desde JavaScript -->
+    <script type="application/json" id="bookedSlots">{{ booked_slots | safe }}</script>
+
+    <!-- Scripts externos -->
+    <script src="{{ url_for('static', filename='js/advisory.js') }}"></script>
+</body>
+</html>

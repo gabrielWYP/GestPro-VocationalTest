@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Orientación Vocacional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🎯 Vocational Test</div>
+            <ul class="nav-menu">
+                <li><a href="#" onclick="scrollToSection('inicio')">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <h1>Encuentra tu Carrera Ideal</h1>
+            <p>Un test interactivo y personalizado que te ayudará a descubrir tu vocación</p>
+            <a href="/test" class="btn btn-primary">Comenzar Test</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>¿Por qué este test?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">📋</div>
+                    <h3>Test Personalizado</h3>
+                    <p>8 preguntas cuidadosamente diseñadas para analizar tus intereses y habilidades.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">💼</div>
+                    <h3>8 Carreras</h3>
+                    <p>Explora ocho carreras profesionales populares y en demanda en el mercado actual.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">👨‍💼</div>
+                    <h3>Asesoría Profesional</h3>
+                    <p>Agenda una asesoría con nuestros orientadores vocacionales para profundizar en tu elección.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about">
+        <div class="container">
+            <h2>Sobre el Test</h2>
+            <p>Este test de orientación vocacional ha sido diseñado para ayudarte a identificar las carreras que mejor se alinean con tus intereses, habilidades y valores. A través de preguntas reflexivas sobre tus preferencias, fortalezas y objetivos profesionales, obtendrás recomendaciones personalizadas.</p>
+            <p>El resultado no es definitivo, sino una guía para explorar diferentes opciones. Te recomendamos que complementes el test con una asesoría personalizada para tomar una decisión informada sobre tu futuro.</p>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Cómo Funciona</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Responde el Test</h3>
+                    <p>Completa 8 preguntas en 5 minutos</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Obtén tu Resultado</h3>
+                    <p>Descubre tu carrera recomendada</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Explora las Opciones</h3>
+                    <p>Conoce más sobre carreras relacionadas</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Agenda Asesoría</h3>
+                    <p>Habla con un profesional de orientación</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+            <p>Ayudándote a encontrar tu camino profesional 🚀</p>
+        </div>
+    </footer>
+
+    <!-- Scripts externos -->
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>
