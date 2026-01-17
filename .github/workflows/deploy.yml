@@ -44,12 +44,12 @@ jobs:
           
           # 3. Correr el nuevo contenedor
           # -d: Detached (corre en el fondo)
-          # -p 8000:8000: Abre el puerto (Host:Contenedor). Ajusta según tu app.
+          # -p 80:80: Abre el puerto (Host:Contenedor). Ajusta según tu app.
           # --restart unless-stopped: Si se reinicia la VM, el docker revive solo.
           sudo docker run -d \
             --name contenedor-prod \
             --restart unless-stopped \
-            -p 8000:8000 \
+            -p 80:80 \
             vocational_image:latest
             
           # 4. Limpieza de basura (Importante en VM gratis con poco disco)

@@ -31,7 +31,7 @@ COPY frontend/static ./static
 RUN mkdir -p /app/data
 
 # Exponer puerto 8000
-EXPOSE 8000
+EXPOSE 80
 
 # Variables de entorno
 ENV FLASK_ENV=production
