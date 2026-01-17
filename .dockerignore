@@ -1,0 +1,42 @@
+# Archivos de Git
+.git
+.gitignore
+
+# Documentación
+README.md
+TECHNICAL.md
+*.md
+
+# Scripts
+scripts/
+
+# Archivos de Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de Docker existentes en backend (usamos los de la raíz)
+backend/Dockerfile
+backend/docker-compose.yml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs y datos locales
+*.log
+*.db
+data/
