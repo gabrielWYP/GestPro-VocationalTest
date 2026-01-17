@@ -4,14 +4,15 @@
 
 CONTAINER_NAME="${2:-vocational-test-container}"
 IMAGE_NAME="${3:-vocational-test:latest}"
+PORT="${4:-8000}"
 APP_PATH="/mnt/tesis_data/codigo/vocational_test"
 
 case "$1" in
     start)
         echo "🚀 Iniciando la aplicación..."
         cd "$APP_PATH"
-        docker run -d -p 80:80 --name "$CONTAINER_NAME" "$IMAGE_NAME"
-        echo "✓ Aplicación iniciada en http://localhost"
+        docker run -d -p "$PORT":$PORT --name "$CONTAINER_NAME" "$IMAGE_NAME"
+        echo "✓ Aplicación iniciada en http://localhost:$PORT"
         ;;
     stop)
         echo "⛔ Deteniendo la aplicación..."
