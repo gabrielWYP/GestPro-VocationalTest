@@ -14,7 +14,7 @@ load_dotenv(env_path)
 
 # Configuración de conexión Oracle Autonomous DB
 ORACLE_CONFIG = {
-    'user': os.environ.get('ORACLE_USER', ''),
+    'user': os.environ.get('ORACLE_USER', 'ADMIN'),
     'password': os.environ.get('ORACLE_PASSWORD', ''),
     'connection_string': os.environ.get('ORACLE_CONNECTION_STRING', ''),
 }
