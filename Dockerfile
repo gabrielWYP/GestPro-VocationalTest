@@ -16,8 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copiar el código del backend
-COPY backend/app.py .
-COPY backend/db ./db
+COPY backend/ .
 
 # Copiar los archivos del frontend (templates y static)
 COPY frontend/templates ./templates
