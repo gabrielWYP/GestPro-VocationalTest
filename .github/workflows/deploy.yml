@@ -26,34 +26,118 @@ jobs:
           
           echo "✅ Archivos copiados."
 
-      # 3. (Opcional) Instalar dependencias o reiniciar servicio
+      # 3. Build & Deploy con docker-compose
       - name: Build & Deploy Docker
+        env:
+          # Leer secretos de GitHub y pasarlos como variables de entorno
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_PASSWORD: ${{ secrets.ORACLE_PASSWORD }}
+          ORACLE_CONNECTION_STRING: ${{ secrets.ORACLE_CONNECTION_STRING }}
         run: |
-          echo "🐳 Iniciando proceso Docker..."
+          set -e  # Salir si hay algún error
+          
+          echo "🐳 Iniciando proceso Docker con compose..."
           cd /mnt/tesis_data/codigo/vocational_test_prd
           
-          # 1. Build de la imagen (Crea la 'receta' actualizada)
-          # -t le pone nombre a la imagen. El punto final (.) indica "directorio actual"
-          sudo docker build -t vocational_image:latest .
+          # PASO 0: Respaldar imagen anterior (rollback)
+          BACKUP_IMAGE="vocational_test_dev-vocational-test:backup"
+          CURRENT_IMAGE="vocational_test_dev-vocational-test:latest"
           
-          # 2. Detener y eliminar el contenedor viejo (si existe)
-          # El '|| true' es el truco: si es la primera vez y no hay nada que borrar, 
-          # el comando falla pero el '|| true' le dice al script "no importa, sigue".
-          sudo docker stop contenedor-prod || true
-          sudo docker rm contenedor-prod || true
+          echo "💾 Respaldando imagen anterior..."
+          if sudo docker images | grep -q "$CURRENT_IMAGE"; then
+            sudo docker tag $CURRENT_IMAGE $BACKUP_IMAGE || true
+            echo "✅ Imagen respaldada como: $BACKUP_IMAGE"
+          else
+            echo "⚠️  Primera vez, no hay imagen anterior para respaldar"
+          fi
           
-          # 3. Correr el nuevo contenedor
-          # -d: Detached (corre en el fondo)
-          # -p 80:80: Abre el puerto (Host:Contenedor). Ajusta según tu app.
-          # --restart unless-stopped: Si se reinicia la VM, el docker revive solo.
-          sudo docker run -d \
-            --name contenedor-prod \
-            --restart unless-stopped \
-            -p 80:80 \
-            vocational_image:latest
+          # Crear archivo .env en producción con los secretos de GitHub
+          cat > .env << EOF
+          ORACLE_USER=${ORACLE_USER}
+          ORACLE_PASSWORD=${ORACLE_PASSWORD}
+          ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
+          EOF
+          
+          # PASO 1: Detener contenedor viejo
+          echo "🛑 Deteniendo contenedor anterior..."
+          sudo docker compose down || true
+          
+          # PASO 2: Build de la nueva imagen
+          echo "🔨 Construyendo nueva imagen..."
+          if ! sudo docker compose build --no-cache; then
+            echo "❌ ERROR: Fallo en build de imagen"
+            echo "🔄 Restaurando imagen anterior..."
+            sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
+            exit 1
+          fi
+          echo "✅ Build exitoso"
+          
+          # PASO 3: Levantar nuevo contenedor
+          echo "🚀 Iniciando nuevo contenedor..."
+          if ! sudo docker compose up -d; then
+            echo "❌ ERROR: Fallo al iniciar contenedor"
+            echo "🔄 Restaurando imagen anterior..."
+            sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
+            exit 1
+          fi
+          echo "✅ Contenedor iniciado"
+          
+          # PASO 4: Validar healthcheck (máx 30s)
+          echo "⏳ Esperando healthcheck..."
+          HEALTHCHECK_PASSED=false
+          for i in {1..30}; do
+            if sudo docker compose ps | grep -q "healthy"; then
+              echo "✅ Contenedor saludable"
+              HEALTHCHECK_PASSED=true
+              break
+            fi
+            echo "⏳ Intento $i/30..."
+            sleep 1
+          done
+          
+          # PASO 5: Si healthcheck falla, hacer rollback
+          if [ "$HEALTHCHECK_PASSED" = false ]; then
+            echo "❌ ERROR CRÍTICO: Healthcheck falló después de 30 segundos"
+            echo "🔄 Iniciando rollback a imagen anterior..."
             
-          # 4. Limpieza de basura (Importante en VM gratis con poco disco)
-          # Borra las imágenes viejas que quedaron sin nombre tras el build nuevo
+            # Detener contenedor fallido
+            sudo docker compose down || true
+            
+            # Restaurar imagen anterior
+            sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
+            
+            # Levantar contenedor con imagen anterior
+            echo "📦 Levantando contenedor con imagen respaldada..."
+            if sudo docker compose up -d; then
+              echo "✅ Rollback completado - Servicio restaurado"
+              # Notificar
+              echo ""
+              echo "═══════════════════════════════════════════"
+              echo "⚠️  DEPLOY FALLIDO - ROLLBACK COMPLETADO"
+              echo "═══════════════════════════════════════════"
+              echo "Imagen nueva no pasó healthcheck"
+              echo "Se ha restaurado la versión anterior"
+              echo "Verifica los logs del contenedor:"
+              echo "  docker logs vocational-test-app"
+              echo "═══════════════════════════════════════════"
+            else
+              echo "❌ CRÍTICO: Rollback falló - Servicio sin imagen"
+              exit 1
+            fi
+            exit 1
+          fi
+          
+          # PASO 6: Limpiar .env después de deploy (por seguridad)
+          rm -f .env
+          
+          # PASO 7: Limpieza de imágenes viejas
+          echo "🧹 Limpiando imágenes antiguas..."
           sudo docker image prune -f
           
-          echo "✅ Despliegue en Docker completado."
+          echo ""
+          echo "═══════════════════════════════════════════"
+          echo "✅ DEPLOY EXITOSO"
+          echo "═══════════════════════════════════════════"
+          echo "Nueva imagen deployada y validada"
+          echo "Contenedor corriendo correctamente"
+          echo "═══════════════════════════════════════════"

@@ -8,11 +8,11 @@ services:
       context: .
       dockerfile: Dockerfile
       # Plataformas soportadas (descomentar según necesidad)
-      # platforms:
-      #   - linux/amd64
-      #   - linux/arm64
+      platforms:
+      - linux/amd64
+      - linux/arm64
     ports:
-      - "80:80"
+      - "80:8000"
     container_name: vocational-test-app
     restart: unless-stopped
     volumes:
@@ -20,8 +20,19 @@ services:
     environment:
       - FLASK_ENV=production
       - DATABASE_PATH=/app/data/vocational_test.db
+      - ORACLE_USER=${ORACLE_USER}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+      - ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:80')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -2,35 +2,12 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 from datetime import datetime, timedelta
-import sqlite3
+from db.db_config import get_oracle_connection
 
 app = Flask(__name__)
-# Usar variable de entorno para la base de datos (útil para Docker)
-app.config['DATABASE'] = os.environ.get('DATABASE_PATH', 'vocational_test.db')
 
-# Inicializar base de datos
-def init_db():
-    if not os.path.exists(app.config['DATABASE']):
-        conn = sqlite3.connect(app.config['DATABASE'])
-        c = conn.cursor()
-        c.execute('''CREATE TABLE advisories (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
-                        email TEXT NOT NULL,
-                        date TEXT NOT NULL,
-                        time TEXT NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-        c.execute('''CREATE TABLE test_results (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
-                        email TEXT NOT NULL,
-                        result_career TEXT NOT NULL,
-                        scores TEXT NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-        conn.commit()
-        conn.close()
-
-init_db()
+# Inicialización de base de datos no es necesaria con Oracle Autonomous DB
+# Las tablas deben estar creadas en la BD externa
 
 # Definir carreras disponibles
 CAREERS = [
@@ -91,8 +68,6 @@ CAREERS = [
         "icon": "📚"
     }
 ]
-
-##Cambio para gatillar ci/cd
 
 # Preguntas del test
 QUESTIONS = [
@@ -211,13 +186,20 @@ def submit_test():
     best_career_id = max(career_scores, key=career_scores.get)
     best_career = next(c for c in CAREERS if c['id'] == best_career_id)
     
-    # Guardar resultado en BD
-    conn = sqlite3.connect(app.config['DATABASE'])
-    c = conn.cursor()
-    c.execute('INSERT INTO test_results (name, email, result_career, scores) VALUES (?, ?, ?, ?)',
-              (name, email, best_career['name'], json.dumps(career_scores)))
-    conn.commit()
-    conn.close()
+    # Guardar resultado en BD Oracle
+    try:
+        conn = get_oracle_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO ALEJO.test_results (name, email, result_career, scores) VALUES (:1, :2, :3, :4)',
+            (name, email, best_career['name'], json.dumps(career_scores))
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        app.logger.error(f"Error guardando resultado de test: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al guardar resultado'}), 500
     
     return jsonify({
         'success': True,
@@ -227,12 +209,18 @@ def submit_test():
 
 @app.route('/advisory')
 def advisory():
-    conn = sqlite3.connect(app.config['DATABASE'])
-    c = conn.cursor()
-    c.execute('SELECT date, time FROM advisories WHERE date >= ? ORDER BY date, time', 
-              (datetime.now().date().isoformat(),))
-    booked_slots = [f"{row[0]} {row[1]}" for row in c.fetchall()]
-    conn.close()
+    try:
+        conn = get_oracle_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT date, time FROM ALEJO.advisories WHERE date >= TRUNC(SYSDATE) ORDER BY date, time'
+        )
+        booked_slots = [f"{row[0]} {row[1]}" for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        app.logger.error(f"Error obteniendo asesorías: {str(e)}")
+        booked_slots = []
     
     return render_template('advisory.html', booked_slots=json.dumps(booked_slots))
 
@@ -248,29 +236,40 @@ def submit_advisory():
         return jsonify({'success': False, 'message': 'Faltan datos'}), 400
     
     try:
-        conn = sqlite3.connect(app.config['DATABASE'])
-        c = conn.cursor()
-        c.execute('INSERT INTO advisories (name, email, date, time) VALUES (?, ?, ?, ?)',
-                  (name, email, date, time))
+        conn = get_oracle_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO ALEJO.advisories (name, email, date, time) VALUES (:1, :2, :3, :4)',
+            (name, email, date, time)
+        )
         conn.commit()
+        cursor.close()
         conn.close()
         
         return jsonify({
             'success': True,
             'message': f'Asesoría agendada para {date} a las {time}'
         })
-    except sqlite3.IntegrityError:
-        return jsonify({'success': False, 'message': 'Este horario ya está reservado'}), 400
+    except Exception as e:
+        if 'UNIQUE' in str(e) or 'constraint' in str(e).lower():
+            return jsonify({'success': False, 'message': 'Este horario ya está reservado'}), 400
+        app.logger.error(f"Error guardando asesoría: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al guardar asesoría'}), 500
 
 @app.route('/api/available-times')
 def available_times():
     date = request.args.get('date', '')
     
-    conn = sqlite3.connect(app.config['DATABASE'])
-    c = conn.cursor()
-    c.execute('SELECT time FROM advisories WHERE date = ?', (date,))
-    booked_times = [row[0] for row in c.fetchall()]
-    conn.close()
+    try:
+        conn = get_oracle_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT time FROM ALEJO.advisories WHERE date = :1', (date,))
+        booked_times = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        app.logger.error(f"Error obteniendo horarios: {str(e)}")
+        booked_times = []
     
     # Horarios disponibles: 09:00 a 17:00 con intervalos de 30 minutos
     all_times = []
@@ -288,4 +287,4 @@ def available_times():
     return jsonify({'available_times': all_times})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=False)
+    app.run(host='0.0.0.0', port=8000, debug=False)
