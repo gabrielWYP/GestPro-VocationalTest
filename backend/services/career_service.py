@@ -2,7 +2,7 @@
 Lógica de negocio para carreras
 """
 from .career_data import CAREERS
-from db.db_config import get_oracle_connection
+from db.db_config import OracleConnection
 
 
 class CareerService:
