@@ -1,0 +1,59 @@
+name: Deploy en VM Privada
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # <--- Esto busca tu runner en la VM
+    
+    steps:
+      # 1. El runner descarga el código nuevo del repo
+      - name: Tomar código más reciente
+        uses: actions/checkout@v4
+
+      # 2. Copiar archivos a la carpeta de producción
+      - name: Desplegar archivos
+        run: |
+          echo "🚀 Iniciando despliegue en /mnt/tesis_data/proyecto-prod..."
+          
+          # Usamos rsync para copiar todo EXCEPTO la carpeta .git (para mantenerlo limpio)
+          # -a: archive mode (mantiene permisos)
+          # -v: verbose (para que veas qué pasa en los logs)
+          # --delete: borra archivos en destino que ya no existen en el origen (espejo exacto)
+          rsync -av --exclude='.git' --exclude='.github' ./ /mnt/tesis_data/codigo/vocational_test_prd
+          
+          echo "✅ Archivos copiados."
+
+      # 3. (Opcional) Instalar dependencias o reiniciar servicio
+      - name: Build & Deploy Docker
+        run: |
+          echo "🐳 Iniciando proceso Docker..."
+          cd /mnt/tesis_data/codigo/vocational_test_prd
+          
+          # 1. Build de la imagen (Crea la 'receta' actualizada)
+          # -t le pone nombre a la imagen. El punto final (.) indica "directorio actual"
+          sudo docker build -t vocational_image:latest .
+          
+          # 2. Detener y eliminar el contenedor viejo (si existe)
+          # El '|| true' es el truco: si es la primera vez y no hay nada que borrar, 
+          # el comando falla pero el '|| true' le dice al script "no importa, sigue".
+          sudo docker stop contenedor-prod || true
+          sudo docker rm contenedor-prod || true
+          
+          # 3. Correr el nuevo contenedor
+          # -d: Detached (corre en el fondo)
+          # -p 8000:8000: Abre el puerto (Host:Contenedor). Ajusta según tu app.
+          # --restart unless-stopped: Si se reinicia la VM, el docker revive solo.
+          sudo docker run -d \
+            --name contenedor-prod \
+            --restart unless-stopped \
+            -p 8000:8000 \
+            vocational_image:latest
+            
+          # 4. Limpieza de basura (Importante en VM gratis con poco disco)
+          # Borra las imágenes viejas que quedaron sin nombre tras el build nuevo
+          sudo docker image prune -f
+          
+          echo "✅ Despliegue en Docker completado."
