@@ -40,11 +40,14 @@ def _get_pool():
     if not ORACLE_CONFIG['connection_string']:
         raise ValueError("ORACLE_CONNECTION_STRING no está configurada")
     
-    # Crear pool con parámetros mínimos (patrón oficial - thin mode)
+    # Crear pool con parámetros optimizados (patrón oficial - thin mode)
     _pool = oracledb.create_pool(
         user=ORACLE_CONFIG['user'],
         password=ORACLE_CONFIG['password'],
-        dsn=ORACLE_CONFIG['connection_string']
+        dsn=ORACLE_CONFIG['connection_string'],
+        min=2,           # Mínimo 2 conexiones en el pool
+        max=10,          # Máximo 10 conexiones
+        increment=1      # Agregar 1 conexión cuando sea necesario
     )
     
     logger.info("✅ Pool de conexiones Oracle inicializado")
