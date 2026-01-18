@@ -10,8 +10,14 @@ class CareerService:
     
     @staticmethod
     def get_all_careers() -> list:
-        """Obtener todas las carreras"""
-        return CAREERS
+        with OracleConnection() as conn:
+            """Obtener todas las carreras"""
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM CARRERAS")
+            careers = cursor.fetchall()
+            cursor.close()
+        
+        return careers
     
     @staticmethod
     def get_career_by_id(career_id: int) -> dict:
@@ -24,5 +30,9 @@ class CareerService:
         Returns:
             Dict con datos de la carrera
         """
-        career = next((c for c in CAREERS if c['id'] == career_id), None)
+        with OracleConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM CARRERAS WHERE ID = :id", id=career_id)
+            career = cursor.fetchone()
+            cursor.close()
         return career
