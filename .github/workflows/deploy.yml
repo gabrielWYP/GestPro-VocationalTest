@@ -18,13 +18,33 @@ jobs:
         run: |
           echo "🚀 Iniciando despliegue en /mnt/tesis_data/proyecto-prod..."
           
-          # Usamos rsync para copiar todo EXCEPTO la carpeta .git (para mantenerlo limpio)
-          # -a: archive mode (mantiene permisos)
-          # -v: verbose (para que veas qué pasa en los logs)
-          # --delete: borra archivos en destino que ya no existen en el origen (espejo exacto)
-          rsync -av --exclude='.git' --exclude='.github' ./ /mnt/tesis_data/codigo/vocational_test_prd
+          # Limpiar carpeta PRD completamente (excepto .env si existe)
+          echo "🧹 Limpiando carpeta de destino..."
+          if [ -d /mnt/tesis_data/codigo/vocational_test_prd ]; then
+            # Guardar .env si existe (contiene secretos)
+            if [ -f /mnt/tesis_data/codigo/vocational_test_prd/.env ]; then
+              cp /mnt/tesis_data/codigo/vocational_test_prd/.env /tmp/.env.backup
+            fi
+            
+            # Eliminar todo en PRD
+            rm -rf /mnt/tesis_data/codigo/vocational_test_prd/*
+            rm -rf /mnt/tesis_data/codigo/vocational_test_prd/.github
+            rm -rf /mnt/tesis_data/codigo/vocational_test_prd/.git
+            
+            # Restaurar .env si lo guardamos
+            if [ -f /tmp/.env.backup ]; then
+              cp /tmp/.env.backup /mnt/tesis_data/codigo/vocational_test_prd/.env
+              rm /tmp/.env.backup
+            fi
+          else
+            mkdir -p /mnt/tesis_data/codigo/vocational_test_prd
+          fi
           
-          echo "✅ Archivos copiados."
+          # Copiar archivos de DEV a PRD (espejo exacto, sin .git ni .github)
+          echo "📦 Copiando archivos desde DEV a PRD..."
+          rsync -av --exclude='.git' --exclude='.github' --exclude='.env' ./ /mnt/tesis_data/codigo/vocational_test_prd/
+          
+          echo "✅ Archivos copiados exitosamente (carpeta reemplazada)."
 
       # 3. Build & Deploy con docker-compose
       - name: Build & Deploy Docker
