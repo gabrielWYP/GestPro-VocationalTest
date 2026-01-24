@@ -107,8 +107,8 @@ jobs:
           HEALTHCHECK_PASSED=false
           for i in {1..30}; do
             # Validar que ambos contenedores estén corriendo usando JSON format
-            VOCATIONAL_STATUS=$(sudo docker compose ps --format json | grep vocational-test-app | jq -r '.State' 2>/dev/null || echo "")
-            NGINX_STATUS=$(sudo docker compose ps --format json | grep nginx | jq -r '.State' 2>/dev/null || echo "")
+            VOCATIONAL_STATUS=$(sudo docker compose ps --format json 2>/dev/null | grep vocational-test-app | jq -r '.State' 2>/dev/null | head -1 || echo "")
+            NGINX_STATUS=$(sudo docker compose ps --format json 2>/dev/null | grep nginx | jq -r '.State' 2>/dev/null | head -1 || echo "")
             
             if [ "$VOCATIONAL_STATUS" = "running" ] && [ "$NGINX_STATUS" = "running" ]; then
               echo "✅ Todos los contenedores corriendo"
