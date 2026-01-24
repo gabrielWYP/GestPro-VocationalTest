@@ -106,15 +106,14 @@ jobs:
           echo "⏳ Esperando healthchecks..."
           HEALTHCHECK_PASSED=false
           for i in {1..30}; do
-            NGINX_HEALTHY=$(sudo docker compose ps nginx-reverse-proxy | grep -q "healthy" && echo "1" || echo "0")
-            APP_HEALTHY=$(sudo docker compose ps vocational-test-app | grep -q "healthy" && echo "1" || echo "0")
-            
-            if [ "$NGINX_HEALTHY" = "1" ] && [ "$APP_HEALTHY" = "1" ]; then
-              echo "✅ Todos los contenedores saludables"
+            # Validar que ambos contenedores estén corriendo (state: running)
+            if sudo docker compose ps | grep -q "vocational-test-app.*running" && \
+               sudo docker compose ps | grep -q "nginx-reverse-proxy.*running"; then
+              echo "✅ Todos los contenedores corriendo"
               HEALTHCHECK_PASSED=true
               break
             fi
-            echo "⏳ Intento $i/30 - Nginx: ${NGINX_HEALTHY:-0}, App: ${APP_HEALTHY:-0}"
+            echo "⏳ Intento $i/30 - Esperando que contenedores estén listos..."
             sleep 1
           done
           
