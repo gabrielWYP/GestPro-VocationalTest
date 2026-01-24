@@ -31,8 +31,20 @@ IS_DEVELOPMENT = APP_MODE == 'DEVELOPMENT'
 
 # Crear instancia de Flask
 # Especificar rutas correctas para templates y static files
-template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'templates'))
-static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'static'))
+app_dir = os.path.dirname(os.path.abspath(__file__))
+
+# En Docker: app.py está en /app, templates en /app/templates
+# En desarrollo: app.py está en backend/, templates en ../frontend/templates
+if os.path.exists(os.path.join(app_dir, 'templates')):
+    # Docker: templates como sibling de app.py
+    template_dir = os.path.join(app_dir, 'templates')
+    static_dir = os.path.join(app_dir, 'static')
+else:
+    # Desarrollo: templates en carpeta frontend hermana
+    parent_dir = os.path.dirname(app_dir)
+    template_dir = os.path.join(parent_dir, 'frontend', 'templates')
+    static_dir = os.path.join(parent_dir, 'frontend', 'static')
+
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config['DEBUG'] = DEBUG or IS_DEVELOPMENT
 
