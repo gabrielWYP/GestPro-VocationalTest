@@ -46,7 +46,7 @@ jobs:
           
           echo "✅ Archivos copiados exitosamente (carpeta reemplazada)."
 
-      # 3. Build & Deploy con docker-compose
+      # 3. Build & Deploy con docker-compose (desde shared_infrastructure)
       - name: Build & Deploy Docker
         env:
           # Leer secretos de GitHub y pasarlos como variables de entorno
@@ -56,12 +56,12 @@ jobs:
         run: |
           set -e  # Salir si hay algún error
           
-          echo "🐳 Iniciando proceso Docker con compose..."
-          cd /mnt/tesis_data/codigo/vocational_test_prd
+          echo "🐳 Iniciando proceso Docker con Nginx reverse proxy..."
+          cd /mnt/tesis_data/codigo/shared_infrastructure
           
           # PASO 0: Respaldar imagen anterior (rollback)
-          BACKUP_IMAGE="vocational_test_dev-vocational-test:backup"
-          CURRENT_IMAGE="vocational_test_dev-vocational-test:latest"
+          BACKUP_IMAGE="shared_infrastructure-vocational-test-app:backup"
+          CURRENT_IMAGE="shared_infrastructure-vocational-test-app:latest"
           
           echo "💾 Respaldando imagen anterior..."
           if sudo docker images | grep -q "$CURRENT_IMAGE"; then
@@ -71,20 +71,20 @@ jobs:
             echo "⚠️  Primera vez, no hay imagen anterior para respaldar"
           fi
           
-          # Crear archivo .env en producción con los secretos de GitHub
+          # Crear archivo .env en shared_infrastructure con los secretos de GitHub
           cat > .env << EOF
           ORACLE_USER=${ORACLE_USER}
           ORACLE_PASSWORD=${ORACLE_PASSWORD}
           ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
           EOF
           
-          # PASO 1: Detener contenedor viejo
-          echo "🛑 Deteniendo contenedor anterior..."
+          # PASO 1: Detener contenedores viejos
+          echo "🛑 Deteniendo contenedores anteriores..."
           sudo docker compose down || true
           
           # PASO 2: Build de la nueva imagen
           echo "🔨 Construyendo nueva imagen..."
-          if ! sudo docker compose build --no-cache; then
+          if ! sudo docker compose build --no-cache vocational-test-app; then
             echo "❌ ERROR: Fallo en build de imagen"
             echo "🔄 Restaurando imagen anterior..."
             sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
@@ -92,10 +92,10 @@ jobs:
           fi
           echo "✅ Build exitoso"
           
-          # PASO 3: Levantar nuevo contenedor
-          echo "🚀 Iniciando nuevo contenedor..."
+          # PASO 3: Levantar nuevos contenedores (Nginx + vocational-test-app)
+          echo "🚀 Iniciando contenedores (Nginx + App)..."
           if ! sudo docker compose up -d; then
-            echo "❌ ERROR: Fallo al iniciar contenedor"
+            echo "❌ ERROR: Fallo al iniciar contenedores"
             echo "🔄 Restaurando imagen anterior..."
             sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
             exit 1
@@ -103,15 +103,18 @@ jobs:
           echo "✅ Contenedor iniciado"
           
           # PASO 4: Validar healthcheck (máx 30s)
-          echo "⏳ Esperando healthcheck..."
+          echo "⏳ Esperando healthchecks..."
           HEALTHCHECK_PASSED=false
           for i in {1..30}; do
-            if sudo docker compose ps | grep -q "healthy"; then
-              echo "✅ Contenedor saludable"
+            NGINX_HEALTHY=$(sudo docker compose ps nginx-reverse-proxy | grep -q "healthy" && echo "1" || echo "0")
+            APP_HEALTHY=$(sudo docker compose ps vocational-test-app | grep -q "healthy" && echo "1" || echo "0")
+            
+            if [ "$NGINX_HEALTHY" = "1" ] && [ "$APP_HEALTHY" = "1" ]; then
+              echo "✅ Todos los contenedores saludables"
               HEALTHCHECK_PASSED=true
               break
             fi
-            echo "⏳ Intento $i/30..."
+            echo "⏳ Intento $i/30 - Nginx: ${NGINX_HEALTHY:-0}, App: ${APP_HEALTHY:-0}"
             sleep 1
           done
           
@@ -120,14 +123,14 @@ jobs:
             echo "❌ ERROR CRÍTICO: Healthcheck falló después de 30 segundos"
             echo "🔄 Iniciando rollback a imagen anterior..."
             
-            # Detener contenedor fallido
+            # Detener contenedores fallidos
             sudo docker compose down || true
             
             # Restaurar imagen anterior
             sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
             
-            # Levantar contenedor con imagen anterior
-            echo "📦 Levantando contenedor con imagen respaldada..."
+            # Levantar contenedores con imagen anterior
+            echo "📦 Levantando contenedores con imagen respaldada..."
             if sudo docker compose up -d; then
               echo "✅ Rollback completado - Servicio restaurado"
               # Notificar
@@ -139,6 +142,7 @@ jobs:
               echo "Se ha restaurado la versión anterior"
               echo "Verifica los logs del contenedor:"
               echo "  docker logs vocational-test-app"
+              echo "  docker logs nginx-reverse-proxy"
               echo "═══════════════════════════════════════════"
             else
               echo "❌ CRÍTICO: Rollback falló - Servicio sin imagen"
@@ -156,8 +160,9 @@ jobs:
           
           echo ""
           echo "═══════════════════════════════════════════"
-          echo "✅ DEPLOY EXITOSO"
+          echo "✅ DEPLOY EXITOSO - NGINX + APP"
           echo "═══════════════════════════════════════════"
-          echo "Nueva imagen deployada y validada"
-          echo "Contenedor corriendo correctamente"
+          echo "Nginx reverse proxy activo en puerto 80"
+          echo "App vocational-test corriendo internamente"
+          echo "Ambos contenedores saludables"
           echo "═══════════════════════════════════════════"
