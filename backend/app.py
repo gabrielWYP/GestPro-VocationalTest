@@ -15,6 +15,7 @@ import logging
 import os
 import sys
 from flask import Flask
+from whitenoise import WhiteNoise
 from config import DEBUG
 from routes import register_blueprints
 
@@ -47,6 +48,10 @@ else:
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config['DEBUG'] = DEBUG or IS_DEVELOPMENT
+
+# Agregar WhiteNoise para servir archivos estáticos en producción
+if not IS_DEVELOPMENT:
+    app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_dir, index_file=False)
 
 # Registrar blueprints (rutas)
 register_blueprints(app)
