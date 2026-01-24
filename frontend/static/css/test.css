@@ -1,0 +1,229 @@
+/* Estilos de Página de Test */
+.test-section {
+    padding: 2rem 0;
+}
+
+.test-intro {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.test-intro h1 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.user-info {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Progress Bar */
+.progress-bar {
+    background-color: var(--border-color);
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Question Card */
+.question-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.question-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.question-text {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.option-label:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f4ff;
+}
+
+.option-label input[type="radio"] {
+    margin-right: 1rem;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.option-label input[type="radio"]:checked + span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.option-label input[type="radio"]:checked {
+    accent-color: var(--primary-color);
+}
+
+/* Navigation */
+.navigation {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.navigation .btn {
+    flex: 1;
+}
+
+/* Results */
+.results-container {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.results-container h2 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
+.result-career {
+    background: #f0f4ff;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.result-career h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.result-scores {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.scores-detail {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.scores-list {
+    margin-top: 1rem;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.score-item span:first-child {
+    min-width: 100px;
+    font-weight: 600;
+}
+
+.score-bar {
+    flex: 1;
+    background-color: var(--border-color);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.score-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.score-item span:last-child {
+    min-width: 30px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.result-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.result-actions .btn {
+    flex: 1;
+}

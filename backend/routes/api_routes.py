@@ -5,9 +5,18 @@ from flask import Blueprint
 from controllers.test_controller import TestController
 from controllers.advisory_controller import AdvisoryController
 from controllers.career_controller import CareerController
+from controllers.auth_controller import AuthController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
+
+# Auth endpoints
+api_bp.add_url_rule('/auth/register', 'register', 
+                    AuthController.register, methods=['POST'])
+api_bp.add_url_rule('/auth/login', 'login',
+                    AuthController.login, methods=['POST'])
+api_bp.add_url_rule('/auth/profile', 'get_profile',
+                    AuthController.get_profile, methods=['GET'])
 
 # Test endpoints
 api_bp.add_url_rule('/test-submit', 'submit_test', 

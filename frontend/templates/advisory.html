@@ -4,17 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar Asesoría - Test de Orientación Vocacional</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/advisory.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">🎯 Vocational Test</div>
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
             <ul class="nav-menu">
                 <li><a href="/">Inicio</a></li>
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/login" class="btn-login">Iniciar Sesión</a></li>
             </ul>
         </div>
     </nav>
