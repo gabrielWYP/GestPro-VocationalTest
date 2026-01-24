@@ -78,9 +78,9 @@ jobs:
           ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
           EOF
           
-          # PASO 1: Detener contenedores viejos
-          echo "🛑 Deteniendo contenedores anteriores..."
-          sudo docker compose down || true
+          # PASO 1: Detener solo vocational-test-app (Nginx sigue corriendo)
+          echo "🛑 Deteniendo vocational-test-app anterior..."
+          sudo docker compose stop vocational-test-app || true
           
           # PASO 2: Build de la nueva imagen
           echo "🔨 Construyendo nueva imagen..."
@@ -92,61 +92,60 @@ jobs:
           fi
           echo "✅ Build exitoso"
           
-          # PASO 3: Levantar nuevos contenedores (Nginx + vocational-test-app)
-          echo "🚀 Iniciando contenedores (Nginx + App)..."
-          if ! sudo docker compose up -d; then
-            echo "❌ ERROR: Fallo al iniciar contenedores"
+          # PASO 3: Levantar solo vocational-test-app (Nginx ya está corriendo)
+          echo "🚀 Iniciando vocational-test-app (Nginx continúa)..."
+          if ! sudo docker compose up -d --no-deps vocational-test-app; then
+            echo "❌ ERROR: Fallo al iniciar vocational-test-app"
             echo "🔄 Restaurando imagen anterior..."
             sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
+            # Intentar reiniciar con imagen anterior
+            sudo docker compose up -d --no-deps vocational-test-app || true
             exit 1
           fi
-          echo "✅ Contenedor iniciado"
+          echo "✅ vocational-test-app iniciado"
           
-          # PASO 4: Validar healthcheck (máx 30s)
-          echo "⏳ Esperando healthchecks..."
+          # PASO 4: Validar que vocational-test-app esté corriendo (máx 30s)
+          echo "⏳ Validando vocational-test-app..."
           HEALTHCHECK_PASSED=false
           for i in {1..30}; do
-            # Validar que ambos contenedores estén corriendo usando JSON format
+            # Validar que vocational-test-app esté corriendo
             VOCATIONAL_STATUS=$(sudo docker compose ps --format json 2>/dev/null | grep vocational-test-app | jq -r '.State' 2>/dev/null | head -1 || echo "")
-            NGINX_STATUS=$(sudo docker compose ps --format json 2>/dev/null | grep nginx | jq -r '.State' 2>/dev/null | head -1 || echo "")
             
-            if [ "$VOCATIONAL_STATUS" = "running" ] && [ "$NGINX_STATUS" = "running" ]; then
-              echo "✅ Todos los contenedores corriendo"
+            if [ "$VOCATIONAL_STATUS" = "running" ]; then
+              echo "✅ vocational-test-app corriendo correctamente"
               HEALTHCHECK_PASSED=true
               break
             fi
-            echo "⏳ Intento $i/30 - Vocational: $VOCATIONAL_STATUS, Nginx: $NGINX_STATUS"
+            echo "⏳ Intento $i/30 - Vocational: $VOCATIONAL_STATUS"
             sleep 1
           done
           
-          # PASO 5: Si healthcheck falla, hacer rollback
+          # PASO 5: Si falla, hacer rollback
           if [ "$HEALTHCHECK_PASSED" = false ]; then
-            echo "❌ ERROR CRÍTICO: Healthcheck falló después de 30 segundos"
-            echo "🔄 Iniciando rollback a imagen anterior..."
+            echo "❌ ERROR: vocational-test-app no pasó validación después de 30 segundos"
+            echo "🔄 Iniciando rollback..."
             
-            # Detener contenedores fallidos
-            sudo docker compose down || true
+            # Detener la versión fallida
+            sudo docker compose stop vocational-test-app || true
             
             # Restaurar imagen anterior
             sudo docker tag $BACKUP_IMAGE $CURRENT_IMAGE || true
             
-            # Levantar contenedores con imagen anterior
-            echo "📦 Levantando contenedores con imagen respaldada..."
-            if sudo docker compose up -d; then
+            # Reintentar con imagen anterior
+            echo "📦 Levantando vocational-test-app con imagen respaldada..."
+            if sudo docker compose up -d --no-deps vocational-test-app; then
               echo "✅ Rollback completado - Servicio restaurado"
-              # Notificar
               echo ""
               echo "═══════════════════════════════════════════"
               echo "⚠️  DEPLOY FALLIDO - ROLLBACK COMPLETADO"
               echo "═══════════════════════════════════════════"
-              echo "Imagen nueva no pasó healthcheck"
+              echo "vocational-test-app falló la validación"
               echo "Se ha restaurado la versión anterior"
               echo "Verifica los logs del contenedor:"
               echo "  docker logs vocational-test-app"
-              echo "  docker logs nginx-reverse-proxy"
               echo "═══════════════════════════════════════════"
             else
-              echo "❌ CRÍTICO: Rollback falló - Servicio sin imagen"
+              echo "❌ CRÍTICO: Rollback falló"
               exit 1
             fi
             exit 1
@@ -161,9 +160,9 @@ jobs:
           
           echo ""
           echo "═══════════════════════════════════════════"
-          echo "✅ DEPLOY EXITOSO - NGINX + APP"
+          echo "✅ DEPLOY EXITOSO - vocational-test-app"
           echo "═══════════════════════════════════════════"
-          echo "Nginx reverse proxy activo en puerto 80"
-          echo "App vocational-test corriendo internamente"
-          echo "Ambos contenedores saludables"
+          echo "Nueva versión deployada correctamente"
+          echo "Nginx reverse proxy continúa sin interrupciones"
+          echo "vocational-test-app corriendo"
           echo "═══════════════════════════════════════════"
