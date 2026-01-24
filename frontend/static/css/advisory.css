@@ -1,0 +1,161 @@
+/* Estilos de Página de Asesoría */
+.advisory-section {
+    padding: 3rem 0;
+}
+
+.advisory-section h1 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 3rem;
+    font-size: 1.1rem;
+}
+
+.advisory-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.advisory-info h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.benefits {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.benefits li {
+    padding: 0.75rem 0;
+    color: #64748b;
+    font-size: 1.05rem;
+}
+
+.duration, .price {
+    background: #f0f4ff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.advisory-form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.advisory-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.success-message {
+    background: #d1fae5;
+    border: 2px solid var(--success-color);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.success-message h3 {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.available-slots {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.available-slots h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.dates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.date-button {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.date-button:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f4ff;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Careers Section */
+.careers-section {
+    padding: 4rem 0;
+}
+
+.skills h4 {
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+}
+
+.skills ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.skills li {
+    padding: 0.5rem 0;
+    color: #64748b;
+}
+
+.skills li::before {
+    content: "• ";
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}

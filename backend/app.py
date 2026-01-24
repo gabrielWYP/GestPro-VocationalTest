@@ -12,6 +12,8 @@ Estructura:
 - utils/: Utilidades y helpers
 """
 import logging
+import os
+import sys
 from flask import Flask
 from config import DEBUG
 from routes import register_blueprints
@@ -23,9 +25,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Determinar modo de ejecución
+APP_MODE = os.getenv('APP_MODE', 'PRODUCTION').upper()
+IS_DEVELOPMENT = APP_MODE == 'DEVELOPMENT'
+
 # Crear instancia de Flask
-app = Flask(__name__)
-app.config['DEBUG'] = DEBUG
+# Especificar rutas correctas para templates y static files
+template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'templates'))
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'static'))
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app.config['DEBUG'] = DEBUG or IS_DEVELOPMENT
 
 # Registrar blueprints (rutas)
 register_blueprints(app)
@@ -43,8 +52,23 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    logger.info("🚀 Iniciando Vocational Test API")
-    app.run(host='0.0.0.0', port=8000, debug=False)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=False)
+    logger.info(f"🚀 Iniciando Vocational Test API en modo {APP_MODE}")
+    
+    if IS_DEVELOPMENT:
+        # Configuración para DEVELOPMENT - Hot reload activo
+        logger.info("⚙️  Modo DEVELOPMENT - Hot reload activado")
+        app.run(
+            host='localhost',
+            port=5000,
+            debug=True,
+            use_reloader=True
+        )
+    else:
+        # Configuración para PRODUCTION
+        logger.info("⚙️  Modo PRODUCTION - Debug desactivado")
+        app.run(
+            host='0.0.0.0',
+            port=8000,
+            debug=False,
+            use_reloader=False
+        )
