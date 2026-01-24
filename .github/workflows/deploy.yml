@@ -106,14 +106,16 @@ jobs:
           echo "⏳ Esperando healthchecks..."
           HEALTHCHECK_PASSED=false
           for i in {1..30}; do
-            # Validar que ambos contenedores estén corriendo (state: running)
-            if sudo docker compose ps | grep -q "vocational-test-app.*running" && \
-               sudo docker compose ps | grep -q "nginx-reverse-proxy.*running"; then
+            # Validar que ambos contenedores estén corriendo usando JSON format
+            VOCATIONAL_STATUS=$(sudo docker compose ps --format json | grep vocational-test-app | jq -r '.State' 2>/dev/null || echo "")
+            NGINX_STATUS=$(sudo docker compose ps --format json | grep nginx | jq -r '.State' 2>/dev/null || echo "")
+            
+            if [ "$VOCATIONAL_STATUS" = "running" ] && [ "$NGINX_STATUS" = "running" ]; then
               echo "✅ Todos los contenedores corriendo"
               HEALTHCHECK_PASSED=true
               break
             fi
-            echo "⏳ Intento $i/30 - Esperando que contenedores estén listos..."
+            echo "⏳ Intento $i/30 - Vocational: $VOCATIONAL_STATUS, Nginx: $NGINX_STATUS"
             sleep 1
           done
           
