@@ -20,8 +20,25 @@ def index():
 @page_bp.route('/careers')
 def careers():
     """Página de carreras"""
-    careers_data = CareerService.get_all_careers()
-    return render_template('careers.html', careers=careers_data)
+    return render_template('careers.html')
+
+
+@page_bp.route('/career-detail')
+def career_detail():
+    """Página de detalle de carrera"""
+    return render_template('career-detail.html')
+
+
+@page_bp.route('/login')
+def login():
+    """Página de login"""
+    return render_template('login.html')
+
+
+@page_bp.route('/register')
+def register():
+    """Página de registro"""
+    return render_template('register.html')
 
 
 @page_bp.route('/test')

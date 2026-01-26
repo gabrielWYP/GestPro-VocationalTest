@@ -1,0 +1,57 @@
+/* Estilos de Hero Section */
+.hero {
+    background: linear-gradient(135deg, #f5f7ff 0%, #faf8f3 25%, #ffe5f0 50%, #fff5e6 75%, #f0f8ff 100%);
+    color: var(--text-color);
+    padding: 5rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(173, 216, 230, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(40px);
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 192, 203, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(50px);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1e293b;
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    color: #475569;
+    font-weight: 400;
+}
