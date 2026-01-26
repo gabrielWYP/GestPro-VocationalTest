@@ -25,9 +25,13 @@
             <ul class="nav-menu">
                 <li><a href="#" onclick="scrollToSection('inicio')">Inicio</a></li>
                 <li><a href="/careers">Carreras</a></li>
-                <li><a href="/test">Test</a></li>
+                <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
-                <li><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -37,7 +41,7 @@
             <h1>No saber qué estudiar</h1>
             <h1>es normal.</h1>
             <p>Te ayudamos a conocerte y explorar el mejor camino para ti.</p>
-            <a href="/test" class="btn btn-primary">Empezar Test</a>
+            <a href="#" onclick="startTestFlow()" class="btn btn-primary">Empezar Test</a>
         </div>
     </section>
 

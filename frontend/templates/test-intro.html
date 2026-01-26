@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción al Test - Test de Orientación Vocacional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test/intro">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-form-wrapper">
+                <h1>¡Listo para descubrir tu carrera ideal?</h1>
+                <p class="auth-subtitle">Test de Orientación Vocacional RIASEC</p>
+
+                <div id="intro-content" class="intro-content">
+                    <div class="intro-info">
+                        <h2>¿Qué esperar del test?</h2>
+                        
+                        <div class="info-card">
+                            <div class="card-number">📋</div>
+                            <div class="card-content">
+                                <h3>36 Preguntas Reflexivas</h3>
+                                <p>Diseñadas para explorar tus intereses, habilidades y valores profesionales.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-number">⏱️</div>
+                            <div class="card-content">
+                                <h3>8 Minutos de tu Tiempo</h3>
+                                <p>Una sesión rápida que te dará resultados significativos.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-number">🎯</div>
+                            <div class="card-content">
+                                <h3>Resultados Personalizados</h3>
+                                <p>Recomendaciones basadas en el modelo RIASEC de Holland.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-number">🚀</div>
+                            <div class="card-content">
+                                <h3>Próximos Pasos</h3>
+                                <p>Explora carreras relacionadas y agenda una asesoría personalizada.</p>
+                            </div>
+                        </div>
+
+                        <div class="user-info-display">
+                            <p><strong>Realizarás el test como:</strong></p>
+                            <p id="user-display-name" class="user-name-display"></p>
+                        </div>
+
+                        <div class="intro-actions">
+                            <a href="/test/responder" class="btn btn-primary">Empezar Test</a>
+                            <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+            <p>Ayudándote a encontrar tu camino profesional 🚀</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        // Mostrar nombre del usuario en la página de intro
+        async function loadUserInfoForIntro() {
+            try {
+                const response = await fetch('/api/auth/check-session', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
+                    document.getElementById('user-display-name').textContent = nombreCompleto;
+                } else {
+                    // Redirigir a login si no está autenticado
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error al verificar sesión:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        // Ejecutar cuando carga el documento
+        document.addEventListener('DOMContentLoaded', loadUserInfoForIntro);
+    </script>
+</body>
+</html>
