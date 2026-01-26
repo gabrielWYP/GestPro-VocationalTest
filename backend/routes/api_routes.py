@@ -17,6 +17,10 @@ api_bp.add_url_rule('/auth/login', 'login',
                     AuthController.login, methods=['POST'])
 api_bp.add_url_rule('/auth/profile', 'get_profile',
                     AuthController.get_profile, methods=['GET'])
+api_bp.add_url_rule('/auth/check-session', 'check_session',
+                    AuthController.check_session, methods=['GET'])
+api_bp.add_url_rule('/auth/logout', 'logout',
+                    AuthController.logout, methods=['POST'])
 
 # Test endpoints
 api_bp.add_url_rule('/test-submit', 'submit_test', 

@@ -41,12 +41,24 @@ def register():
     return render_template('register.html')
 
 
-@page_bp.route('/test')
-def test():
-    """Página del test vocacional"""
+@page_bp.route('/test/intro')
+def test_intro():
+    """Página de introducción al test (requiere estar logueado)"""
+    return render_template('test-intro.html')
+
+
+@page_bp.route('/test/responder')
+def test_responder():
+    """Página del test vocacional (requiere estar logueado)"""
     questions = TestService.get_questions()
     total = len(questions)
     return render_template('test.html', questions=questions, total=total)
+
+
+@page_bp.route('/test')
+def test():
+    """Página del test vocacional - redirige a intro"""
+    return test_intro()
 
 
 @page_bp.route('/advisory')

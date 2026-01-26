@@ -4,7 +4,7 @@ Maneja las peticiones HTTP de registro y login
 """
 
 import logging
-from flask import request, jsonify
+from flask import request, jsonify, session
 from services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -105,6 +105,13 @@ class AuthController:
             )
 
             if result['success']:
+                # Guardar usuario en sesión
+                session.permanent = True
+                session['usuario'] = {
+                    'nombre': result['user']['nombre'],
+                    'apellido': result['user']['apellido'],
+                    'correo': result['user']['correo']
+                }
                 return jsonify(result), 200
             else:
                 return jsonify(result), 401
@@ -146,6 +153,57 @@ class AuthController:
 
         except Exception as e:
             logger.error(f"Error al obtener perfil: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error en el servidor: {str(e)}'
+            }), 500
+
+    @staticmethod
+    def check_session():
+        """
+        Endpoint GET /auth/check-session
+        Verifica si hay una sesión activa
+        Retorna los datos del usuario si existe sesión, sino devuelve no autenticado
+        """
+        try:
+            if 'usuario' in session:
+                return jsonify({
+                    'success': True,
+                    'authenticated': True,
+                    'user': session['usuario']
+                }), 200
+            else:
+                return jsonify({
+                    'success': True,
+                    'authenticated': False,
+                    'user': None
+                }), 200
+
+        except Exception as e:
+            logger.error(f"Error al verificar sesión: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error en el servidor: {str(e)}'
+            }), 500
+
+    @staticmethod
+    def logout():
+        """
+        Endpoint POST /auth/logout
+        Cierra la sesión del usuario actual
+        """
+        try:
+            if 'usuario' in session:
+                session.pop('usuario', None)
+                logger.info(f"Usuario deslogueado: {session.get('usuario', {}).get('correo')}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Sesión cerrada exitosamente'
+            }), 200
+
+        except Exception as e:
+            logger.error(f"Error al cerrar sesión: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': f'Error en el servidor: {str(e)}'

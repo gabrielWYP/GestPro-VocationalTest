@@ -192,3 +192,107 @@
         max-width: 200px;
     }
 }
+
+/* Estilos para página de introducción del test */
+.intro-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.intro-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.intro-info h2 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f8f9ff;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    background: #f0f4ff;
+    transform: translateX(4px);
+}
+
+.card-number {
+    font-size: 1.8rem;
+    min-width: 40px;
+}
+
+.card-content h3 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+}
+
+.card-content p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.user-info-display {
+    padding: 1.5rem;
+    background: #f0f4ff;
+    border-radius: 12px;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.user-info-display p {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.user-name-display {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    font-size: 1.2rem !important;
+    margin-top: 0.5rem !important;
+}
+
+.intro-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.intro-actions .btn {
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .intro-actions {
+        flex-direction: column;
+    }
+
+    .intro-actions .btn {
+        width: 100%;
+    }
+
+    .info-card {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .card-number {
+        font-size: 1.5rem;
+    }
+}
