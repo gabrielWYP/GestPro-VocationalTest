@@ -8,6 +8,81 @@ class CareerService:
     """Servicio para gestionar carreras"""
     
     @staticmethod
+    def get_careers_list() -> list:
+        """
+        Obtener lista básica de carreras (solo id, nombre, icono, descripción)
+        Para la página de listado de carreras - más liviano
+        """
+        try:
+            with OracleConnection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS ORDER BY NOMBRE_CARRERA"
+                    )
+                    rows = cursor.fetchall()
+                    
+                    return [{
+                        'id': row[0],
+                        'name': row[1],
+                        'description': row[2],
+                        'icon': row[3]
+                    } for row in rows]
+        except Exception as e:
+            print(f"Error obteniendo lista de carreras: {e}")
+            return []
+    
+    @staticmethod
+    def get_career_detail(career_id: int) -> dict:
+        """
+        Obtener detalle completo de una carrera (con skills, jobs, etc.)
+        Para la página de detalle de carrera
+        """
+        try:
+            with OracleConnection() as conn:
+                with conn.cursor() as cursor:
+                    # Obtener datos básicos de la carrera
+                    cursor.execute(
+                        f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS WHERE ID = :1",
+                        (career_id,)
+                    )
+                    row = cursor.fetchone()
+                    
+                    if not row:
+                        return None
+                    
+                    # Obtener skills de esta carrera
+                    cursor.execute(
+                        f"""SELECT S.NOMBRE FROM {ORACLE_SCHEMA}.SKILLS S
+                           INNER JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
+                           WHERE CS.FK_CARRERA = :1
+                           ORDER BY S.NOMBRE""",
+                        (career_id,)
+                    )
+                    skills = [skill[0] for skill in cursor.fetchall()]
+                    
+                    # Obtener tareas/jobs de esta carrera
+                    cursor.execute(
+                        f"""SELECT T.NOMBRE FROM {ORACLE_SCHEMA}.TAREAS T
+                           INNER JOIN {ORACLE_SCHEMA}.CARRERA_TAREAS CT ON T.ID = CT.FK_TAREA
+                           WHERE CT.FK_CARRERA = :1
+                           ORDER BY T.NOMBRE""",
+                        (career_id,)
+                    )
+                    jobs = [job[0] for job in cursor.fetchall()]
+                    
+                    return {
+                        'id': row[0],
+                        'name': row[1],
+                        'description': row[2],
+                        'icon': row[3],
+                        'skills': skills,
+                        'jobs': jobs
+                    }
+        except Exception as e:
+            print(f"Error obteniendo detalle de carrera {career_id}: {e}")
+            return None
+    
+    @staticmethod
     def get_all_careers() -> list:
         """Obtener todas las carreras con sus skills desde la BD"""
         try:

@@ -48,6 +48,10 @@ else:
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config['DEBUG'] = DEBUG or IS_DEVELOPMENT
+# Configurar secret key para sesiones
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 horas
 
 # Agregar WhiteNoise para servir archivos estáticos en producción
 if not IS_DEVELOPMENT:

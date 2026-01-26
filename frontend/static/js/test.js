@@ -1,102 +1,145 @@
 // Test de Orientación Vocacional - Lógica del Test
+// Sistema de preguntas por página con sliders de 1-5
 
-let questions = [];
-let currentQuestion = 0;
-let answers = [];
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    const questionsData = document.getElementById('questionsData');
-    if (questionsData) {
-        questions = JSON.parse(questionsData.textContent);
-    }
-});
+let currentPage = 1;
+let testAnswers = {}; // Objeto para almacenar respuestas: { questionId: score }
 
 /**
- * Inicia el test después de validar los datos del usuario
+ * Inicia el test - muestra la primera página
  */
 function startTest() {
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    
-    if (!name || !email) {
-        alert('Por favor completa todos los campos');
-        return;
-    }
-    
     document.getElementById('intro').style.display = 'none';
     document.getElementById('questions').style.display = 'block';
-    loadQuestion();
+    loadPage(currentPage);
 }
 
 /**
- * Carga la pregunta actual y la muestra en la interfaz
+ * Carga una página específica del test con 6 preguntas
+ * @param {number} pageNumber - Número de página (1-indexed)
  */
-function loadQuestion() {
-    if (currentQuestion >= questions.length) {
-        submitTest();
-        return;
-    }
-
-    const question = questions[currentQuestion];
-    const html = `
-        <div class="question-card">
-            <h3>Pregunta ${currentQuestion + 1} de ${questions.length}</h3>
-            <p class="question-text">${question.question}</p>
-            <div class="options">
-                ${question.options.map((option, idx) => `
-                    <label class="option-label">
-                        <input type="radio" name="option" value="${option.text}" 
-                            ${answers[currentQuestion] === option.text ? 'checked' : ''}>
-                        <span>${option.text}</span>
-                    </label>
-                `).join('')}
-            </div>
-        </div>
-        <div class="navigation">
-            <button onclick="previousQuestion()" class="btn btn-secondary" 
-                ${currentQuestion === 0 ? 'disabled' : ''}>Anterior</button>
-            <button onclick="nextQuestion()" class="btn btn-primary">Siguiente</button>
-        </div>
-    `;
-    document.getElementById('question-container').innerHTML = html;
-    updateProgress();
-}
-
-/**
- * Avanza a la siguiente pregunta
- */
-function nextQuestion() {
-    const selected = document.querySelector('input[name="option"]:checked');
-    if (!selected) {
-        alert('Por favor selecciona una respuesta');
+function loadPage(pageNumber) {
+    if (pageNumber < 1 || pageNumber > TOTAL_PAGES) {
         return;
     }
     
-    answers[currentQuestion] = selected.value;
-    currentQuestion++;
-    loadQuestion();
+    currentPage = pageNumber;
+    const pageQuestions = getQuestionsForPage(pageNumber);
+    
+    // Construir HTML de la página
+    let html = `
+        <div class="page-header">
+            <h2>Página ${pageNumber} de ${TOTAL_PAGES}</h2>
+            <p class="page-progress">Preguntas ${(pageNumber - 1) * QUESTIONS_PER_PAGE + 1} a ${Math.min(pageNumber * QUESTIONS_PER_PAGE, TEST_QUESTIONS.length)}</p>
+        </div>
+        
+        <div class="questions-grid">
+    `;
+    
+    // Agregar cada pregunta con su slider
+    pageQuestions.forEach(question => {
+        const score = testAnswers[question.id] || 3; // Default a 3 (neutral)
+        html += `
+            <div class="question-item">
+                <div class="question-header">
+                    <h4>Pregunta ${question.id}</h4>
+                    <span class="question-type">${question.type}</span>
+                </div>
+                <p class="question-text">${question.text}</p>
+                
+                <div class="slider-container">
+                    <div class="slider-labels">
+                        <span class="label-min">Me desagrada mucho</span>
+                        <span class="label-max">Me encanta hacerlo</span>
+                    </div>
+                    <input type="range" 
+                        id="slider-${question.id}" 
+                        class="score-slider" 
+                        min="${SCORE_MIN}" 
+                        max="${SCORE_MAX}" 
+                        value="${score}"
+                        onchange="updateScore(${question.id}, this.value)"
+                        oninput="updateSliderLabel(${question.id}, this.value)">
+                    <div class="slider-value">
+                        <span class="score-number">${score}</span>
+                        <span class="score-label" id="label-${question.id}">${SCORE_LABELS[score]}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    // Botones de navegación
+    html += `
+        <div class="navigation">
+            <button onclick="previousPage()" class="btn btn-secondary" ${pageNumber === 1 ? 'disabled' : ''}>
+                ← Página Anterior
+            </button>
+            <button onclick="submitTest()" class="btn btn-primary" ${pageNumber === TOTAL_PAGES ? '' : 'style="display: none;"'}>
+                Enviar Test
+            </button>
+            <button onclick="nextPage()" class="btn btn-primary" ${pageNumber === TOTAL_PAGES ? 'disabled' : ''}>
+                Siguiente Página →
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('question-container').innerHTML = html;
+    updateProgressBar();
 }
 
 /**
- * Retrocede a la pregunta anterior
+ * Actualiza el puntaje de una pregunta
+ * @param {number} questionId - ID de la pregunta
+ * @param {number} value - Valor del slider (1-5)
  */
-function previousQuestion() {
-    if (currentQuestion > 0) {
-        const selected = document.querySelector('input[name="option"]:checked');
-        if (selected) {
-            answers[currentQuestion] = selected.value;
-        }
-        currentQuestion--;
-        loadQuestion();
+function updateScore(questionId, value) {
+    testAnswers[questionId] = parseInt(value);
+    updateSliderLabel(questionId, value);
+}
+
+/**
+ * Actualiza la etiqueta mostrada bajo el slider
+ * @param {number} questionId - ID de la pregunta
+ * @param {number} value - Valor del slider
+ */
+function updateSliderLabel(questionId, value) {
+    const labelElement = document.getElementById(`label-${questionId}`);
+    if (labelElement) {
+        labelElement.textContent = SCORE_LABELS[value];
+    }
+    
+    // También actualizar el número mostrado
+    const numberElement = document.querySelector(`#slider-${questionId}`).parentElement.querySelector('.score-number');
+    if (numberElement) {
+        numberElement.textContent = value;
     }
 }
 
 /**
- * Actualiza la barra de progreso del test
+ * Carga la siguiente página
  */
-function updateProgress() {
-    const progress = ((currentQuestion + 1) / questions.length) * 100;
+function nextPage() {
+    if (currentPage < TOTAL_PAGES) {
+        loadPage(currentPage + 1);
+    }
+}
+
+/**
+ * Carga la página anterior
+ */
+function previousPage() {
+    if (currentPage > 1) {
+        loadPage(currentPage - 1);
+    }
+}
+
+/**
+ * Actualiza la barra de progreso
+ */
+function updateProgressBar() {
+    const progress = (currentPage / TOTAL_PAGES) * 100;
     document.getElementById('progress').style.width = progress + '%';
 }
 
@@ -104,19 +147,21 @@ function updateProgress() {
  * Envía el test completado al servidor
  */
 async function submitTest() {
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
+    // Validar que todas las preguntas estén respondidas
+    if (Object.keys(testAnswers).length < TEST_QUESTIONS.length) {
+        alert('Por favor responde todas las preguntas antes de enviar');
+        return;
+    }
     
     try {
         const response = await fetch('/api/test-submit', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                name: name,
-                email: email,
-                answers: answers
+                answers: testAnswers
             })
         });
 
@@ -125,7 +170,7 @@ async function submitTest() {
         if (data.success) {
             displayResults(data.career, data.scores);
         } else {
-            alert('Error al procesar el test');
+            alert('Error al procesar el test: ' + (data.message || 'Intenta de nuevo'));
         }
     } catch (error) {
         console.error('Error:', error);
@@ -144,13 +189,12 @@ function displayResults(career, scores) {
     
     const careerHtml = `
         <div class="career-result">
-            <div class="result-icon">${career.icon}</div>
             <h3>${career.name}</h3>
             <p>${career.description}</p>
             <div class="skills">
                 <h4>Habilidades Clave:</h4>
                 <ul>
-                    ${career.skills.map(skill => `<li>${skill}</li>`).join('')}
+                    ${(career.skills || []).map(skill => `<li>${skill}</li>`).join('')}
                 </ul>
             </div>
         </div>
@@ -158,15 +202,15 @@ function displayResults(career, scores) {
     
     const scoresHtml = `
         <div class="scores-detail">
-            <h4>Puntuación por Carrera:</h4>
+            <h4>Tus Resultados:</h4>
             <div class="scores-list">
-                ${Object.entries(scores).map(([id, score]) => {
+                ${Object.entries(scores).map(([type, score]) => {
                     return `<div class="score-item">
-                        <span>Carrera ${id}:</span>
+                        <span>${type}:</span>
                         <div class="score-bar">
-                            <div class="score-fill" style="width: ${(score / 4) * 100}%"></div>
+                            <div class="score-fill" style="width: ${score * 10}%"></div>
                         </div>
-                        <span>${score}</span>
+                        <span>${score}/10</span>
                     </div>`;
                 }).join('')}
             </div>
@@ -176,3 +220,4 @@ function displayResults(career, scores) {
     document.getElementById('result-career').innerHTML = careerHtml;
     document.getElementById('result-scores').innerHTML = scoresHtml;
 }
+
