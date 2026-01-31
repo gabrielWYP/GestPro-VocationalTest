@@ -5,6 +5,25 @@ const SESSION_CACHE_KEY = 'session_cache';
 const SESSION_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 
 /**
+ * Oculta los elementos de sesión hasta que se verificue el estado
+ * Previene el "flash" de contenido incorrecto
+ */
+function hideSessionElements() {
+    const loginLink = document.getElementById('login-link');
+    const userMenu = document.getElementById('user-menu');
+    
+    if (loginLink) loginLink.style.display = 'none';
+    if (userMenu) userMenu.style.display = 'none';
+}
+
+/**
+ * Inicializa ocultando los elementos de sesión
+ */
+function initSessionUI() {
+    hideSessionElements();
+}
+
+/**
  * Obtiene datos de sesión del cache si existen y no han expirado
  * @returns {Object|null} Datos de sesión cacheados o null si no existen/expiraron
  */
@@ -130,17 +149,24 @@ async function checkSession() {
         
         if (data.authenticated) {
             // Usuario autenticado - mostrar menú de usuario
-            loginLink.style.display = 'none';
-            userMenu.style.display = 'flex';
-            const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
-            userName.textContent = nombreCompleto;
+            if (loginLink) loginLink.style.display = 'none';
+            if (userMenu) userMenu.style.display = 'flex';
+            if (userName) {
+                const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
+                userName.textContent = nombreCompleto;
+            }
         } else {
             // No autenticado - mostrar botón de login
-            loginLink.style.display = 'block';
-            userMenu.style.display = 'none';
+            if (loginLink) loginLink.style.display = 'block';
+            if (userMenu) userMenu.style.display = 'none';
         }
     } catch (error) {
         console.error('Error al verificar sesión:', error);
+        // En caso de error, mostrar botón de login como fallback
+        const loginLink = document.getElementById('login-link');
+        const userMenu = document.getElementById('user-menu');
+        if (loginLink) loginLink.style.display = 'block';
+        if (userMenu) userMenu.style.display = 'none';
     }
 }
 
@@ -171,4 +197,7 @@ async function logout() {
 }
 
 // Verificar sesión cuando carga la página
-document.addEventListener('DOMContentLoaded', checkSession);
+document.addEventListener('DOMContentLoaded', function() {
+    initSessionUI();  // Ocultar elementos antes de verificar
+    checkSession();   // Luego verificar y mostrar los correctos
+});
