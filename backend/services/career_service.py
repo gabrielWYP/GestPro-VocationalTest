@@ -1,6 +1,7 @@
 """
 Lógica de negocio para carreras
 """
+from functools import lru_cache
 from db.db_config import OracleConnection
 from config import ORACLE_SCHEMA
 
@@ -8,10 +9,12 @@ class CareerService:
     """Servicio para gestionar carreras"""
     
     @staticmethod
-    def get_careers_list() -> list:
+    @lru_cache(maxsize=128)
+    def get_careers_list() -> tuple:
         """
         Obtener lista básica de carreras (solo id, nombre, icono, descripción)
         Para la página de listado de carreras - más liviano
+        Cacheado: máximo 128 resultados en memoria
         """
         try:
             with OracleConnection() as conn:
@@ -21,21 +24,24 @@ class CareerService:
                     )
                     rows = cursor.fetchall()
                     
-                    return [{
+                    result = tuple({
                         'id': row[0],
                         'name': row[1],
                         'description': row[2],
                         'icon': row[3]
-                    } for row in rows]
+                    } for row in rows)
+                    return result
         except Exception as e:
             print(f"Error obteniendo lista de carreras: {e}")
-            return []
+            return ()
     
     @staticmethod
+    @lru_cache(maxsize=128)
     def get_career_detail(career_id: int) -> dict:
         """
         Obtener detalle completo de una carrera (con skills, jobs, etc.)
         Para la página de detalle de carrera
+        Cacheado: máximo 128 consultas diferentes en memoria
         """
         try:
             with OracleConnection() as conn:
@@ -83,8 +89,11 @@ class CareerService:
             return None
     
     @staticmethod
-    def get_all_careers() -> list:
-        """Obtener todas las carreras con sus skills desde la BD"""
+    @lru_cache(maxsize=1)
+    def get_all_careers() -> tuple:
+        """Obtener todas las carreras con sus skills desde la BD
+        Cacheado: solo se guarda 1 resultado ya que no toma parámetros
+        """
         try:
             with OracleConnection() as conn:
                 with conn.cursor() as cursor:
@@ -115,12 +124,13 @@ class CareerService:
                             'icon': row[3]
                         })
                     
-                    return careers
+                    return tuple(careers)
         except Exception as e:
             print(f"Error obteniendo carreras: {e}")
-            return []
+            return ()
     
     @staticmethod
+    @lru_cache(maxsize=128)
     def get_career_by_id(career_id: int) -> dict:
         """
         Obtener una carrera por ID con sus skills desde la BD
@@ -130,6 +140,8 @@ class CareerService:
             
         Returns:
             Dict con datos de la carrera y lista de skills
+            
+        Nota: Cacheado hasta 128 carreras diferentes
         """
         try:
             with OracleConnection() as conn:
