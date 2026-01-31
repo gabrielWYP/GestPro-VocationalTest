@@ -16,6 +16,21 @@ class TestService:
         """Obtener todas las preguntas del test"""
         return QUESTIONS
     
+    
+    @staticmethod
+    def get_afirmaciones():
+        with OracleConnection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"SELECT ID, AFIRMACION_DSC FROM {ORACLE_SCHEMA}.AFIRMACIONES ORDER BY ID"
+                )
+                rows = cursor.fetchall()
+                result = tuple({
+                    'id': row[0],
+                    'text': row[1]
+                } for row in rows)
+                return result
+    
     @staticmethod
     def calculate_scores(answers: list) -> dict:
         """
