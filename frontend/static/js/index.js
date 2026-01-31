@@ -1,5 +1,59 @@
 // Página de Inicio - Funciones Auxiliares
 
+// Configuración de cache de sesión
+const SESSION_CACHE_KEY = 'session_cache';
+const SESSION_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+
+/**
+ * Obtiene datos de sesión del cache si existen y no han expirado
+ * @returns {Object|null} Datos de sesión cacheados o null si no existen/expiraron
+ */
+function getCachedSession() {
+    const cached = localStorage.getItem(SESSION_CACHE_KEY);
+    if (!cached) return null;
+
+    try {
+        const { data, timestamp } = JSON.parse(cached);
+        const now = Date.now();
+
+        // Verificar si el cache ha expirado
+        if (now - timestamp < SESSION_CACHE_EXPIRY) {
+            console.log('Usando datos de sesión en caché');
+            return data;
+        } else {
+            // Cache expirado, eliminarlo
+            localStorage.removeItem(SESSION_CACHE_KEY);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error leyendo cache de sesión:', error);
+        localStorage.removeItem(SESSION_CACHE_KEY);
+        return null;
+    }
+}
+
+/**
+ * Guarda datos de sesión en el cache
+ * @param {Object} data - Datos de sesión a guardar
+ */
+function setCachedSession(data) {
+    try {
+        localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({
+            data: data,
+            timestamp: Date.now()
+        }));
+    } catch (error) {
+        console.error('Error guardando cache de sesión:', error);
+    }
+}
+
+/**
+ * Elimina el cache de sesión (útil para logout)
+ */
+function clearSessionCache() {
+    localStorage.removeItem(SESSION_CACHE_KEY);
+}
+
 /**
  * Desplaza suavemente a una sección específica
  * @param {string} sectionId - ID de la sección a la que desplazarse
@@ -18,12 +72,22 @@ function scrollToSection(sectionId) {
  */
 async function startTestFlow() {
     try {
-        const response = await fetch('/api/auth/check-session', {
-            method: 'GET',
-            credentials: 'include'
-        });
-        
-        const data = await response.json();
+        // Intentar obtener del cache primero
+        let data = getCachedSession();
+
+        // Si no hay cache válido, hacer la petición a la API
+        if (!data) {
+            console.log('Verificando sesión en la API');
+            const response = await fetch('/api/auth/check-session', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            data = await response.json();
+            
+            // Guardar en el cache
+            setCachedSession(data);
+        }
         
         if (data.authenticated) {
             // Usuario logueado → ir a página de introducción del test
@@ -43,12 +107,22 @@ async function startTestFlow() {
  */
 async function checkSession() {
     try {
-        const response = await fetch('/api/auth/check-session', {
-            method: 'GET',
-            credentials: 'include'
-        });
-        
-        const data = await response.json();
+        // Intentar obtener del cache primero
+        let data = getCachedSession();
+
+        // Si no hay cache válido, hacer la petición a la API
+        if (!data) {
+            console.log('Verificando sesión en la API');
+            const response = await fetch('/api/auth/check-session', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            data = await response.json();
+            
+            // Guardar en el cache
+            setCachedSession(data);
+        }
         
         const loginLink = document.getElementById('login-link');
         const userMenu = document.getElementById('user-menu');
@@ -83,6 +157,8 @@ async function logout() {
         const data = await response.json();
         
         if (data.success) {
+            // Limpiar el cache de sesión
+            clearSessionCache();
             // Redirigir a inicio después del logout
             window.location.href = '/';
         } else {

@@ -1,15 +1,67 @@
 // Cargar carreras desde la API (Oracle Autonomous Database)
 // Endpoint: GET /api/careers/list - solo datos básicos (id, nombre, icono, descripción)
+// Con localStorage para cachear durante 1 día
+
+const CACHE_KEY = 'careers_cache';
+const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+
+// Obtener datos del cache si existen y no han expirado
+function getCachedCareers() {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+
+    try {
+        const { data, timestamp } = JSON.parse(cached);
+        const now = Date.now();
+
+        // Verificar si el cache ha expirado
+        if (now - timestamp < CACHE_EXPIRY_TIME) {
+            console.log('Usando datos en caché');
+            return data;
+        } else {
+            // Cache expirado, eliminarlo
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error leyendo cache:', error);
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+    }
+}
+
+// Guardar datos en el cache
+function setCachedCareers(data) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            data: data,
+            timestamp: Date.now()
+        }));
+    } catch (error) {
+        console.error('Error guardando en cache:', error);
+    }
+}
+
 async function loadCareers() {
     const grid = document.getElementById('careers-grid');
     grid.innerHTML = '<p class="loading">Cargando carreras...</p>';
 
     try {
-        const response = await fetch('/api/careers/list');
-        const data = await response.json();
+        // Intentar obtener del cache primero
+        let data = getCachedCareers();
 
-        if (!data.success) {
-            throw new Error(data.message || 'Error al cargar carreras');
+        // Si no hay cache válido, hacer la petición a la API
+        if (!data) {
+            console.log('Obteniendo carreras de la API');
+            const response = await fetch('/api/careers/list');
+            data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Error al cargar carreras');
+            }
+
+            // Guardar en el cache
+            setCachedCareers(data);
         }
 
         grid.innerHTML = '';
