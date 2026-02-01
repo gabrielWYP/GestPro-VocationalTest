@@ -1,45 +1,71 @@
 // Cargar carreras desde la API (Oracle Autonomous Database)
-// Endpoint: GET /api/careers/list - solo datos básicos (id, nombre, icono, descripción)
+// Endpoint: GET /api/careers/all - datos completos (id, nombre, icono, descripción, skills, jobs)
 // Con localStorage para cachear durante 1 día
 
-const CACHE_KEY = 'careers_cache';
-const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+const CAREERS_CACHE_KEY = 'careers_full_cache';
+const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 
-// Obtener datos del cache si existen y no han expirado
+/**
+ * Obtener datos del cache si existen y no han expirado
+ * @returns {Object|null} Datos cacheados o null
+ */
 function getCachedCareers() {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(CAREERS_CACHE_KEY);
     if (!cached) return null;
 
     try {
         const { data, timestamp } = JSON.parse(cached);
         const now = Date.now();
 
-        // Verificar si el cache ha expirado
-        if (now - timestamp < CACHE_EXPIRY_TIME) {
-            console.log('Usando datos en caché');
+        if (now - timestamp < CAREERS_CACHE_EXPIRY) {
+            console.log('Usando carreras en caché');
             return data;
         } else {
-            // Cache expirado, eliminarlo
-            localStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(CAREERS_CACHE_KEY);
             return null;
         }
     } catch (error) {
-        console.error('Error leyendo cache:', error);
-        localStorage.removeItem(CACHE_KEY);
+        console.error('Error leyendo cache de carreras:', error);
+        localStorage.removeItem(CAREERS_CACHE_KEY);
         return null;
     }
 }
 
-// Guardar datos en el cache
+/**
+ * Guardar datos en el cache
+ * @param {Object} data - Datos a guardar
+ */
 function setCachedCareers(data) {
     try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
+        localStorage.setItem(CAREERS_CACHE_KEY, JSON.stringify({
             data: data,
             timestamp: Date.now()
         }));
     } catch (error) {
-        console.error('Error guardando en cache:', error);
+        console.error('Error guardando cache de carreras:', error);
     }
+}
+
+/**
+ * Cargar TODAS las carreras con todos sus datos
+ * Se hace una sola llamada y se guarda en cache
+ */
+async function loadAllCareersToCache() {
+    // Si ya hay cache válido, retornarlo
+    let cached = getCachedCareers();
+    if (cached) return cached;
+
+    // Si no hay cache, cargar desde API
+    console.log('Cargando todas las carreras desde API...');
+    const response = await fetch('/api/careers/all');
+    const data = await response.json();
+
+    if (data.success) {
+        setCachedCareers(data);
+        return data;
+    }
+    
+    throw new Error(data.message || 'Error al cargar carreras');
 }
 
 async function loadCareers() {
@@ -47,23 +73,8 @@ async function loadCareers() {
     grid.innerHTML = '<p class="loading">Cargando carreras...</p>';
 
     try {
-        // Intentar obtener del cache primero
-        let data = getCachedCareers();
-
-        // Si no hay cache válido, hacer la petición a la API
-        if (!data) {
-            console.log('Obteniendo carreras de la API');
-            const response = await fetch('/api/careers/list');
-            data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || 'Error al cargar carreras');
-            }
-
-            // Guardar en el cache
-            setCachedCareers(data);
-        }
-
+        const data = await loadAllCareersToCache();
+        
         grid.innerHTML = '';
 
         for (const career of data.careers) {
@@ -76,7 +87,7 @@ async function loadCareers() {
                 <p class="career-description">${career.description}</p>
             `;
             
-            // Al hacer clic, ir al detalle (ahí se carga toda la info)
+            // Al hacer clic, ir al detalle (usará el cache)
             card.onclick = () => {
                 window.location.href = `/career-detail?id=${career.id}`;
             };
