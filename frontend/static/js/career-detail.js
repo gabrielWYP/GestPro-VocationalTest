@@ -1,5 +1,75 @@
-// Cargar detalle de carrera desde la API (Oracle Autonomous Database)
-// Endpoint: GET /api/careers/{id}/detail - datos completos (skills, jobs, etc.)
+// Cargar detalle de carrera desde CACHE o API
+// Usa el mismo cache que careers-list.js para evitar llamadas innecesarias
+
+const CAREERS_CACHE_KEY = 'careers_full_cache';
+const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+
+/**
+ * Obtener datos del cache si existen y no han expirado
+ */
+function getCachedCareers() {
+    const cached = localStorage.getItem(CAREERS_CACHE_KEY);
+    if (!cached) return null;
+
+    try {
+        const { data, timestamp } = JSON.parse(cached);
+        const now = Date.now();
+
+        if (now - timestamp < CAREERS_CACHE_EXPIRY) {
+            console.log('Usando carreras en caché');
+            return data;
+        } else {
+            localStorage.removeItem(CAREERS_CACHE_KEY);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error leyendo cache:', error);
+        localStorage.removeItem(CAREERS_CACHE_KEY);
+        return null;
+    }
+}
+
+/**
+ * Guardar datos en el cache
+ */
+function setCachedCareers(data) {
+    try {
+        localStorage.setItem(CAREERS_CACHE_KEY, JSON.stringify({
+            data: data,
+            timestamp: Date.now()
+        }));
+    } catch (error) {
+        console.error('Error guardando cache:', error);
+    }
+}
+
+/**
+ * Obtener una carrera por ID desde el cache o API
+ */
+async function getCareerById(careerId) {
+    // Intentar obtener del cache primero
+    let cached = getCachedCareers();
+    
+    if (cached && cached.careers) {
+        const career = cached.careers.find(c => c.id == careerId);
+        if (career) {
+            console.log('Carrera encontrada en caché');
+            return career;
+        }
+    }
+    
+    // Si no está en cache, cargar todas las carreras
+    console.log('Cargando carreras desde API...');
+    const response = await fetch('/api/careers/all');
+    const data = await response.json();
+    
+    if (data.success) {
+        setCachedCareers(data);
+        return data.careers.find(c => c.id == careerId);
+    }
+    
+    return null;
+}
 
 async function loadCareerDetail() {
     const params = new URLSearchParams(window.location.search);
@@ -11,16 +81,12 @@ async function loadCareerDetail() {
     }
 
     try {
-        // Obtener detalle completo de la carrera
-        const response = await fetch(`/api/careers/${careerId}/detail`);
-        const data = await response.json();
+        const career = await getCareerById(careerId);
 
-        if (!data.success || !data.career) {
+        if (!career) {
             showError('Carrera no encontrada');
             return;
         }
-
-        const career = data.career;
 
         // Actualizar encabezado
         document.getElementById('career-name').textContent = career.name;
@@ -58,7 +124,7 @@ async function loadCareerDetail() {
             jobsList.innerHTML = '<li>Información no disponible</li>';
         }
 
-        // Cargar carreras relacionadas
+        // Cargar carreras relacionadas (desde cache)
         loadRelatedCareers(careerId);
 
     } catch (error) {
@@ -77,24 +143,32 @@ function showError(message) {
     `;
 }
 
-// Cargar carreras relacionadas (usa endpoint liviano /list)
+// Cargar carreras relacionadas (usa el cache)
 async function loadRelatedCareers(currentCareerId) {
     const relatedGrid = document.getElementById('related-grid');
     relatedGrid.innerHTML = '<p>Cargando...</p>';
 
     try {
-        const response = await fetch('/api/careers/list');
-        const data = await response.json();
-
-        if (!data.success) {
-            relatedGrid.innerHTML = '';
-            return;
+        // Obtener del cache
+        let cached = getCachedCareers();
+        
+        if (!cached) {
+            // Si no hay cache, cargar desde API
+            const response = await fetch('/api/careers/all');
+            const data = await response.json();
+            if (data.success) {
+                setCachedCareers(data);
+                cached = data;
+            } else {
+                relatedGrid.innerHTML = '';
+                return;
+            }
         }
 
         relatedGrid.innerHTML = '';
         let count = 0;
 
-        for (const career of data.careers) {
+        for (const career of cached.careers) {
             if (career.id != currentCareerId && count < 3) {
                 const card = document.createElement('div');
                 card.className = 'related-career-card';

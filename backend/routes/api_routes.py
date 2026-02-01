@@ -40,6 +40,8 @@ api_bp.add_url_rule('/booked-slots', 'get_booked_slots',
 # Career endpoints
 api_bp.add_url_rule('/careers/list', 'get_careers_list',
                     CareerController.get_careers_list, methods=['GET'])
+api_bp.add_url_rule('/careers/all', 'get_all_careers_full',
+                    CareerController.get_all_careers_full, methods=['GET'])
 api_bp.add_url_rule('/careers/<int:career_id>/detail', 'get_career_detail',
                     CareerController.get_career_detail, methods=['GET'])
 api_bp.add_url_rule('/careers', 'get_all_careers',
