@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Test de Orientación Vocacional</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS Modular -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
@@ -85,6 +86,9 @@
     </footer>
 
     <script>
+        // Constante del cache de sesión (debe coincidir con index.js)
+        const SESSION_CACHE_KEY = 'session_cache';
+        
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -110,6 +114,13 @@
                     // Guardar información del usuario en localStorage
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('isLoggedIn', 'true');
+                    
+                    // IMPORTANTE: Actualizar el cache de sesión para que la página principal
+                    // muestre el estado correcto inmediatamente
+                    localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({
+                        data: { authenticated: true, user: data.user },
+                        timestamp: Date.now()
+                    }));
                     
                     messageDiv.className = 'auth-message success';
                     messageDiv.textContent = '¡Login exitoso! Redirigiendo...';

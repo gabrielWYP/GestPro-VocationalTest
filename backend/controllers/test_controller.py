@@ -68,3 +68,24 @@ class TestController:
                 'success': False,
                 'message': 'Error procesando test'
             }), 500
+            
+    @staticmethod
+    def get_afirmaciones_controller():
+        """
+        Endpoint GET /api/test-questions
+        Retorna las afirmaciones del test
+        """
+        try:
+            questions = TestService.get_afirmaciones()
+            
+            return jsonify({
+                'success': True,
+                'questions': questions
+            })
+        
+        except Exception as e:
+            logger.error(f"Error en get_afirmaciones_controller: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error obteniendo preguntas'
+            }), 500
