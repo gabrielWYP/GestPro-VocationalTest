@@ -7,6 +7,8 @@ const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 /**
  * Obtener datos del cache si existen y no han expirado
  */
+
+//Try Ci-cd
 function getCachedCareers() {
     const cached = localStorage.getItem(CAREERS_CACHE_KEY);
     if (!cached) return null;
