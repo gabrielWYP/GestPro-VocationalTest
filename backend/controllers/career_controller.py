@@ -79,6 +79,26 @@ class CareerController:
             }), 500
     
     @staticmethod
+    def get_all_careers_full():
+        """
+        Endpoint GET /api/careers/all
+        Obtiene TODAS las carreras con TODOS sus datos (skills + jobs)
+        Para cachear en frontend y evitar múltiples llamadas
+        """
+        try:
+            careers = CareerService.get_all_careers_full()
+            return jsonify({
+                'success': True,
+                'careers': careers
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo carreras completas: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error obteniendo carreras'
+            }), 500
+    
+    @staticmethod
     def get_career(career_id: int):
         """
         Endpoint GET /api/careers/<id>

@@ -130,6 +130,58 @@ class CareerService:
             return ()
     
     @staticmethod
+    @lru_cache(maxsize=1)
+    def get_all_careers_full() -> tuple:
+        """Obtener todas las carreras con TODOS sus datos (skills + jobs)
+        Para cargar en cache del frontend y evitar múltiples llamadas
+        Cacheado: solo se guarda 1 resultado ya que no toma parámetros
+        """
+        try:
+            with OracleConnection() as conn:
+                with conn.cursor() as cursor:
+                    # Obtener todas las carreras
+                    cursor.execute(f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS ORDER BY NOMBRE_CARRERA")
+                    rows = cursor.fetchall()
+                    
+                    careers = []
+                    for row in rows:
+                        career_id = row[0]
+                        
+                        # Obtener skills de esta carrera
+                        cursor.execute(
+                            f"""SELECT S.NOMBRE FROM {ORACLE_SCHEMA}.SKILLS S
+                               INNER JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
+                               WHERE CS.FK_CARRERA = :1
+                               ORDER BY S.NOMBRE""",
+                            (career_id,)
+                        )
+                        skills = [skill[0] for skill in cursor.fetchall()]
+                        
+                        # Obtener tareas/jobs de esta carrera
+                        cursor.execute(
+                            f"""SELECT T.NOMBRE FROM {ORACLE_SCHEMA}.TAREAS T
+                               INNER JOIN {ORACLE_SCHEMA}.CARRERA_TAREAS CT ON T.ID = CT.FK_TAREA
+                               WHERE CT.FK_CARRERA = :1
+                               ORDER BY T.NOMBRE""",
+                            (career_id,)
+                        )
+                        jobs = [job[0] for job in cursor.fetchall()]
+                        
+                        careers.append({
+                            'id': career_id,
+                            'name': row[1],
+                            'description': row[2],
+                            'icon': row[3],
+                            'skills': skills,
+                            'jobs': jobs
+                        })
+                    
+                    return tuple(careers)
+        except Exception as e:
+            print(f"Error obteniendo carreras completas: {e}")
+            return ()
+    
+    @staticmethod
     @lru_cache(maxsize=128)
     def get_career_by_id(career_id: int) -> dict:
         """

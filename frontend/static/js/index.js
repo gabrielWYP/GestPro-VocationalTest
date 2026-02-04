@@ -33,6 +33,24 @@ function getCachedSession() {
 }
 
 /**
+ * Aplicación INMEDIATA del estado de sesión desde cache
+ * Se ejecuta ANTES del DOMContentLoaded para evitar el "flash" de contenido incorrecto
+ */
+(function applySessionStateImmediately() {
+    const cached = getCachedSession();
+    if (cached && cached.authenticated) {
+        // Inyectar CSS inline para ocultar login y mostrar user-menu inmediatamente
+        const style = document.createElement('style');
+        style.id = 'session-preload-style';
+        style.textContent = `
+            #login-link { display: none !important; }
+            #user-menu { display: flex !important; }
+        `;
+        document.head.appendChild(style);
+    }
+})();
+
+/**
  * Guarda datos de sesión en el cache
  * @param {Object} data - Datos de sesión a guardar
  */
@@ -109,38 +127,56 @@ async function checkSession() {
     try {
         // Intentar obtener del cache primero
         let data = getCachedSession();
+        
+        // Si hay cache válido, aplicar inmediatamente
+        if (data) {
+            applySessionUI(data);
+        }
 
-        // Si no hay cache válido, hacer la petición a la API
-        if (!data) {
-            console.log('Verificando sesión en la API');
-            const response = await fetch('/api/auth/check-session', {
-                method: 'GET',
-                credentials: 'include'
-            });
-            
-            data = await response.json();
-            
-            // Guardar en el cache
-            setCachedSession(data);
-        }
+        // Siempre verificar con el servidor para mantener sincronizado
+        const response = await fetch('/api/auth/check-session', {
+            method: 'GET',
+            credentials: 'include'
+        });
         
-        const loginLink = document.getElementById('login-link');
-        const userMenu = document.getElementById('user-menu');
-        const userName = document.getElementById('user-name');
+        const serverData = await response.json();
         
-        if (data.authenticated) {
-            // Usuario autenticado - mostrar menú de usuario
-            loginLink.style.display = 'none';
-            userMenu.style.display = 'flex';
-            const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
-            userName.textContent = nombreCompleto;
-        } else {
-            // No autenticado - mostrar botón de login
-            loginLink.style.display = 'block';
-            userMenu.style.display = 'none';
-        }
+        // Actualizar cache con datos del servidor
+        setCachedSession(serverData);
+        
+        // Aplicar estado del servidor
+        applySessionUI(serverData);
+        
     } catch (error) {
         console.error('Error al verificar sesión:', error);
+    }
+}
+
+/**
+ * Aplica el estado de sesión a la UI
+ * @param {Object} data - Datos de sesión
+ */
+function applySessionUI(data) {
+    const loginLink = document.getElementById('login-link');
+    const userMenu = document.getElementById('user-menu');
+    const userName = document.getElementById('user-name');
+    
+    // Remover estilo de precarga si existe
+    const preloadStyle = document.getElementById('session-preload-style');
+    if (preloadStyle) {
+        preloadStyle.remove();
+    }
+    
+    if (data && data.authenticated) {
+        // Usuario autenticado - mostrar menú de usuario
+        loginLink.style.display = 'none';
+        userMenu.style.display = 'flex';
+        const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
+        userName.textContent = nombreCompleto;
+    } else {
+        // No autenticado - mostrar botón de login
+        loginLink.style.display = 'block';
+        userMenu.style.display = 'none';
     }
 }
 
