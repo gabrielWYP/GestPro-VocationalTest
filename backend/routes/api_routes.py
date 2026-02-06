@@ -29,6 +29,9 @@ api_bp.add_url_rule('/test-submit', 'submit_test',
 api_bp.add_url_rule('/test-questions', 'get_test_questions',
                     TestController.get_afirmaciones_controller, methods=['GET'])
 
+api_bp.add_url_rule('/save-answers', 'save_answers',
+                    TestController.save_answers, methods=['POST'])
+
 # Advisory endpoints
 api_bp.add_url_rule('/advisory-submit', 'book_advisory',
                     AdvisoryController.book_advisory, methods=['POST'])

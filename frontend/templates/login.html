@@ -113,6 +113,7 @@
                 if (data.success) {
                     // Guardar información del usuario en localStorage
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('userId', data.user.id); // Guardar ID por separado para fácil acceso
                     localStorage.setItem('isLoggedIn', 'true');
                     
                     // IMPORTANTE: Actualizar el cache de sesión para que la página principal

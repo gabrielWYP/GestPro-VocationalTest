@@ -105,9 +105,10 @@ class AuthController:
             )
 
             if result['success']:
-                # Guardar usuario en sesión
+                # Guardar usuario en sesión (incluyendo ID para operaciones de BD)
                 session.permanent = True
                 session['usuario'] = {
+                    'id': result['user']['id'],
                     'nombre': result['user']['nombre'],
                     'apellido': result['user']['apellido'],
                     'correo': result['user']['correo']
