@@ -1,11 +1,18 @@
 // Test de Orientación Vocacional - Lógica del Test
-// Sistema de preguntas por página con sliders de 1-5
+// Sistema multi-test: RIASEC (60 preguntas) → Habilidades (10 preguntas)
 
 // Configuración de cache de preguntas
 const QUESTIONS_CACHE_KEY = 'test_questions_cache';
 const QUESTIONS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 
-// Constantes de puntaje
+// Estados del test
+const TEST_STATES = {
+    RIASEC: 'riasec',
+    SKILLS: 'skills',
+    COMPLETED: 'completed'
+};
+
+// Constantes de puntaje RIASEC
 const SCORE_MIN = 1;
 const SCORE_MAX = 5;
 const SCORE_LABELS = {
@@ -16,13 +23,28 @@ const SCORE_LABELS = {
     5: "Me encanta hacerlo"
 };
 
-// Preguntas por página
-const QUESTIONS_PER_PAGE = 6;
+// Constantes de habilidades
+const SKILLS_SCORE_LABELS = {
+    1: "Novato",
+    2: "Básico",
+    3: "Intermedio",
+    4: "Avanzado",
+    5: "Experto"
+};
 
+// Configuración de preguntas por test
+const RIASEC_QUESTIONS_PER_PAGE = 6;
+const SKILLS_QUESTIONS_PER_PAGE = 5;
+
+// Variables de estado global
+let currentTest = TEST_STATES.RIASEC; // Qué test se está tomando
 let currentPage = 1;
-let testAnswers = {}; // Objeto para almacenar respuestas: { questionId: score }
-let TEST_QUESTIONS = []; // Se cargarán desde la API
+let riasecAnswers = {}; // { questionId: score }
+let skillsAnswers = {}; // { questionId: score }
+let TEST_QUESTIONS = []; // Preguntas cargadas
 let TOTAL_PAGES = 0;
+let TOTAL_SKILLS_QUESTIONS = 10; // Las pruebas de habilidades tendrán 10 preguntas
+let QUESTIONS_PER_PAGE = RIASEC_QUESTIONS_PER_PAGE;
 
 // QUESTIONS_PER_PAGE se define en test-constants.js
 
@@ -139,13 +161,17 @@ async function startTest() {
         return;
     }
     
+    // Recuperar respuestas guardadas si existen (para continuar un test en progreso)
+    // Nota: Las respuestas se recuperan desde la BD en el próximo acceso
+    // Por ahora, comenzamos con testAnswers vacío
+    
     document.getElementById('intro').style.display = 'none';
     document.getElementById('questions').style.display = 'block';
     loadPage(currentPage);
 }
 
 /**
- * Carga una página específica del test con 6 preguntas
+ * Carga una página específica del test actual
  * @param {number} pageNumber - Número de página (1-indexed)
  */
 function loadPage(pageNumber) {
@@ -155,6 +181,16 @@ function loadPage(pageNumber) {
     
     currentPage = pageNumber;
     const pageQuestions = getQuestionsForPage(pageNumber);
+    
+    // Obtener respuestas del test actual
+    const currentAnswers = currentTest === TEST_STATES.RIASEC ? riasecAnswers : skillsAnswers;
+    const scoreLabels = currentTest === TEST_STATES.RIASEC ? SCORE_LABELS : SKILLS_SCORE_LABELS;
+    
+    // Construir título del test
+    const testTitle = currentTest === TEST_STATES.RIASEC 
+        ? 'Prueba 1: Orientación Vocacional (RIASEC)' 
+        : 'Prueba 2: Evaluación de Habilidades';
+    document.getElementById('test-title').innerHTML = `<h3>${testTitle}</h3>`;
     
     // Construir HTML de la página
     let html = `
@@ -168,7 +204,10 @@ function loadPage(pageNumber) {
     
     // Agregar cada pregunta con su slider
     pageQuestions.forEach(question => {
-        const score = testAnswers[question.id] || null; // null = no seleccionado
+        const score = currentAnswers[question.id] || null; // null = no seleccionado
+        const labelMin = currentTest === TEST_STATES.RIASEC ? 'Me desagrada mucho' : 'Novato';
+        const labelMax = currentTest === TEST_STATES.RIASEC ? 'Me encanta hacerlo' : 'Experto';
+        
         html += `
             <div class="question-item">
                 <div class="question-header">
@@ -178,21 +217,21 @@ function loadPage(pageNumber) {
                 
                 <div class="score-buttons-container">
                     <div class="score-labels">
-                        <span class="label-min">Me desagrada mucho</span>
-                        <span class="label-max">Me encanta hacerlo</span>
+                        <span class="label-min">${labelMin}</span>
+                        <span class="label-max">${labelMax}</span>
                     </div>
                     <div class="score-buttons">
                         ${[1, 2, 3, 4, 5].map(value => `
                             <button 
                                 class="score-btn score-btn-${value} ${score === value ? 'selected' : ''}"
                                 onclick="updateScore(${question.id}, ${value})"
-                                title="${SCORE_LABELS[value]}">
+                                title="${scoreLabels[value]}">
                                 <span class="score-btn-number">${value}</span>
                             </button>
                         `).join('')}
                     </div>
                     <div class="score-feedback" id="feedback-${question.id}">
-                        ${score ? `<span class="feedback-text">${SCORE_LABELS[score]}</span>` : ''}
+                        ${score ? `<span class="feedback-text">${scoreLabels[score]}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -202,17 +241,26 @@ function loadPage(pageNumber) {
     html += `</div>`;
     
     // Botones de navegación
+    let nextButtonText = 'Siguiente Página →';
+    let lastPageButtonText = '';
+    let lastPageButtonAction = '';
+    
+    if (pageNumber === TOTAL_PAGES) {
+        if (currentTest === TEST_STATES.RIASEC) {
+            lastPageButtonText = 'Siguiente Prueba →';
+            lastPageButtonAction = 'onclick="proceedToNextTest()"';
+        } else if (currentTest === TEST_STATES.SKILLS) {
+            lastPageButtonText = 'Completar';
+            lastPageButtonAction = 'onclick="completeAllTests()"';
+        }
+    }
+    
     html += `
         <div class="navigation">
             <button onclick="previousPage()" class="btn btn-secondary" ${pageNumber === 1 ? 'disabled' : ''}>
                 ← Página Anterior
             </button>
-            <button onclick="submitTest()" class="btn btn-primary" ${pageNumber === TOTAL_PAGES ? '' : 'style="display: none;"'}>
-                Enviar Test
-            </button>
-            <button onclick="nextPage()" class="btn btn-primary" ${pageNumber === TOTAL_PAGES ? 'disabled' : ''}>
-                Siguiente Página →
-            </button>
+            ${pageNumber === TOTAL_PAGES ? `<button ${lastPageButtonAction} class="btn btn-primary">${lastPageButtonText}</button>` : `<button onclick="nextPage()" class="btn btn-primary">Siguiente Página →</button>`}
         </div>
     `;
     
@@ -221,22 +269,28 @@ function loadPage(pageNumber) {
 }
 
 /**
- * Actualiza el puntaje de una pregunta
+ * Actualiza el puntaje de una pregunta según el test actual
  * @param {number} questionId - ID de la pregunta
  * @param {number} value - Valor del selector (1-5)
  */
 function updateScore(questionId, value) {
-    testAnswers[questionId] = parseInt(value);
+    // Guardar en el objeto correcto según cuál test se está tomando
+    if (currentTest === TEST_STATES.RIASEC) {
+        riasecAnswers[questionId] = parseInt(value);
+    } else if (currentTest === TEST_STATES.SKILLS) {
+        skillsAnswers[questionId] = parseInt(value);
+    }
     
     // Actualizar los botones: remover "selected" de todos y agregar al nuevo
     const buttons = document.querySelectorAll(`button[onclick*="updateScore(${questionId}"]`);
     buttons.forEach(btn => btn.classList.remove('selected'));
     document.querySelector(`button[onclick="updateScore(${questionId}, ${value})"]`).classList.add('selected');
     
-    // Actualizar feedback
+    // Actualizar feedback con la etiqueta correcta
     const feedbackElement = document.getElementById(`feedback-${questionId}`);
     if (feedbackElement) {
-        feedbackElement.innerHTML = `<span class="feedback-text">${SCORE_LABELS[value]}</span>`;
+        const labels = currentTest === TEST_STATES.RIASEC ? SCORE_LABELS : SKILLS_SCORE_LABELS;
+        feedbackElement.innerHTML = `<span class="feedback-text">${labels[value]}</span>`;
     }
 }
 
@@ -250,106 +304,144 @@ function updateSliderLabel(questionId, value) {
 }
 
 /**
- * Carga la siguiente página
+ * Carga la siguiente página (con autoguardado)
  */
-function nextPage() {
+async function nextPage() {
     if (currentPage < TOTAL_PAGES) {
+        // Autoguardar respuestas antes de cambiar página
+        await saveAnswersForCurrentPage();
         loadPage(currentPage + 1);
     }
 }
 
 /**
- * Carga la página anterior
+ * Carga la página anterior (con autoguardado)
  */
-function previousPage() {
+async function previousPage() {
     if (currentPage > 1) {
+        // Autoguardar respuestas antes de cambiar página
+        await saveAnswersForCurrentPage();
         loadPage(currentPage - 1);
     }
 }
 
 /**
- * Actualiza la barra de progreso
+ * Guarda las respuestas actuales al servidor
+ * Se ejecuta automáticamente al cambiar de página o completar un test
  */
+async function saveAnswersForCurrentPage() {
+    // Obtener respuestas según el test actual
+    let currentAnswers = {};
+    if (currentTest === TEST_STATES.RIASEC) {
+        currentAnswers = riasecAnswers;
+    } else if (currentTest === TEST_STATES.SKILLS) {
+        currentAnswers = skillsAnswers;
+    }
+    
+    // Convertir a formato esperado por el backend
+    const answersToSave = Object.entries(currentAnswers).map(([questionId, riasecId]) => ({
+        afirmacion_id: parseInt(questionId),
+        riasec_id: parseInt(riasecId)
+    }));
+    
+    if (answersToSave.length === 0) {
+        return; // No hay respuestas para guardar
+    }
+    
+    try {
+        console.log(`Guardando ${answersToSave.length} respuesta(s) de ${currentTest}...`);
+        
+        const response = await fetch('/api/save-answers', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ answers: answersToSave })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✓ Respuestas guardadas:', data.message);
+        } else {
+            console.warn('⚠ Error al guardar respuestas:', data.message);
+        }
+    } catch (error) {
+        console.error('Error guardando respuestas:', error);
+    }
+}
+
+
 function updateProgressBar() {
     const progress = (currentPage / TOTAL_PAGES) * 100;
     document.getElementById('progress').style.width = progress + '%';
 }
 
 /**
- * Envía el test completado al servidor
+ * Pasa a la siguiente prueba (de RIASEC a Habilidades)
  */
-async function submitTest() {
-    // Validar que todas las preguntas estén respondidas
-    if (Object.keys(testAnswers).length < TEST_QUESTIONS.length) {
-        alert('Por favor responde todas las preguntas antes de enviar');
-        return;
-    }
+async function proceedToNextTest() {
+    // Guardar respuestas del RIASEC
+    await saveAnswersForCurrentPage();
     
-    try {
-        const response = await fetch('/api/test-submit', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                answers: testAnswers
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-            displayResults(data.career, data.scores);
-        } else {
-            alert('Error al procesar el test: ' + (data.message || 'Intenta de nuevo'));
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al procesar el test');
-    }
+    // Cambiar a prueba de Habilidades
+    currentTest = TEST_STATES.SKILLS;
+    currentPage = 1;
+    QUESTIONS_PER_PAGE = SKILLS_QUESTIONS_PER_PAGE;
+    TOTAL_PAGES = Math.ceil(TOTAL_SKILLS_QUESTIONS / SKILLS_QUESTIONS_PER_PAGE);
+    
+    // Las siguientes preguntas se cargarían aquí (placeholder por ahora)
+    // TODO: Cargar preguntas de habilidades desde una fuente
+    TEST_QUESTIONS = generateDummySkillsQuestions();
+    
+    // Mostrar la primera página del nuevo test
+    loadPage(currentPage);
 }
 
 /**
- * Muestra los resultados del test
- * @param {Object} career - Objeto con información de la carrera recomendada
- * @param {Object} scores - Objeto con puntuaciones de todas las carreras
+ * Genera preguntas dummy de habilidades (TODO: reemplazar con datos reales)
  */
-function displayResults(career, scores) {
+function generateDummySkillsQuestions() {
+    const dummyQuestions = [];
+    for (let i = 1; i <= TOTAL_SKILLS_QUESTIONS; i++) {
+        dummyQuestions.push({
+            id: i,
+            text: `Pregunta de Habilidad ${i}: ¿Qué tan competente eres en esta área?`
+        });
+    }
+    return dummyQuestions;
+}
+
+/**
+ * Completa todas las pruebas
+ * Guarda respuestas finales y muestra resultados (placeholder)
+ */
+async function completeAllTests() {
+    // Guardar respuestas finales
+    await saveAnswersForCurrentPage();
+    
+    console.log('✓ Todas las pruebas completadas');
+    console.log('Respuestas RIASEC:', riasecAnswers);
+    console.log('Respuestas Habilidades:', skillsAnswers);
+    
+    // TODO: Aquí se llamaría al endpoint de procesamiento final
+    // Por ahora mostramos un mensaje de éxito
     document.getElementById('questions').style.display = 'none';
     document.getElementById('results').style.display = 'block';
     
-    const careerHtml = `
-        <div class="career-result">
-            <h3>${career.name}</h3>
-            <p>${career.description}</p>
-            <div class="skills">
-                <h4>Habilidades Clave:</h4>
-                <ul>
-                    ${(career.skills || []).map(skill => `<li>${skill}</li>`).join('')}
-                </ul>
+    const completionHtml = `
+        <div class="completion-message">
+            <h2>✓ Tests Completados</h2>
+            <p>Tus respuestas han sido guardadas exitosamente.</p>
+            <p>Nos pondremos en contacto pronto con los resultados de tu evaluación.</p>
+            <div class="result-actions">
+                <a href="/advisory" class="btn btn-primary">Agendar Asesoría</a>
+                <a href="/" class="btn btn-secondary">Volver al Inicio</a>
             </div>
         </div>
     `;
     
-    const scoresHtml = `
-        <div class="scores-detail">
-            <h4>Tus Resultados:</h4>
-            <div class="scores-list">
-                ${Object.entries(scores).map(([type, score]) => {
-                    return `<div class="score-item">
-                        <span>${type}:</span>
-                        <div class="score-bar">
-                            <div class="score-fill" style="width: ${score * 10}%"></div>
-                        </div>
-                        <span>${score}/10</span>
-                    </div>`;
-                }).join('')}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('result-career').innerHTML = careerHtml;
-    document.getElementById('result-scores').innerHTML = scoresHtml;
+    document.getElementById('result-career').innerHTML = completionHtml;
+    document.getElementById('result-scores').innerHTML = '';
 }
-

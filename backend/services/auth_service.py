@@ -99,7 +99,7 @@ class AuthService:
                 with conn.cursor() as cursor:
                     # Buscar usuario por correo
                     cursor.execute(
-                        f"""SELECT NOMBRE, APELLIDO, CORREO, PASSWORD 
+                        f"""SELECT ID, NOMBRE, APELLIDO, CORREO, PASSWORD 
                            FROM {ORACLE_SCHEMA}.USUARIO WHERE CORREO = :correo""",
                         {'correo': correo}
                     )
@@ -112,7 +112,7 @@ class AuthService:
                             'user': None
                         }
 
-                    nombre, apellido, correo_db, password_hash = result
+                    usuario_id, nombre, apellido, correo_db, password_hash = result
 
                     # Verificar contraseña
                     password_input_hash = AuthService.hash_password(password)
@@ -128,6 +128,7 @@ class AuthService:
                 'success': True,
                 'message': 'Login exitoso',
                 'user': {
+                    'id': usuario_id,
                     'nombre': nombre,
                     'apellido': apellido,
                     'correo': correo_db
