@@ -91,6 +91,77 @@ class TestController:
             }), 500
 
     @staticmethod
+    def get_test_status():
+        """
+        Endpoint GET /api/test-status
+        Obtiene el estado del test del usuario logueado
+        """
+        try:
+            if 'usuario' not in session:
+                return jsonify({
+                    'success': False,
+                    'message': 'Usuario no autenticado'
+                }), 401
+            
+            usuario_id = session['usuario'].get('id')
+            if not usuario_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'Error: ID de usuario no disponible'
+                }), 400
+            
+            status = TestService.get_test_status(usuario_id)
+            
+            return jsonify({
+                'success': True,
+                'status': status
+            }), 200
+        
+        except Exception as e:
+            logger.error(f"Error en get_test_status: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error obteniendo estado del test'
+            }), 500
+
+    @staticmethod
+    def reset_test():
+        """
+        Endpoint POST /api/reset-test
+        Borra TODAS las respuestas del usuario
+        """
+        try:
+            if 'usuario' not in session:
+                return jsonify({
+                    'success': False,
+                    'message': 'Usuario no autenticado'
+                }), 401
+            
+            usuario_id = session['usuario'].get('id')
+            if not usuario_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'Error: ID de usuario no disponible'
+                }), 400
+            
+            # Borrar todas las respuestas
+            TestService.reset_user_answers(usuario_id)
+            
+            logger.info(f"Test reseteado para usuario {usuario_id}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Test reseteado exitosamente'
+            }), 200
+        
+        except Exception as e:
+            logger.error(f"Error en reset_test: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error al resetear el test'
+            }), 500
+
+    @staticmethod
     def save_answers():
         """
         Endpoint POST /api/save-answers

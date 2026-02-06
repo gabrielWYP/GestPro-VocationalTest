@@ -6,6 +6,7 @@ from controllers.test_controller import TestController
 from controllers.advisory_controller import AdvisoryController
 from controllers.career_controller import CareerController
 from controllers.auth_controller import AuthController
+from controllers.predictions_controller import PredictionsController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -29,8 +30,18 @@ api_bp.add_url_rule('/test-submit', 'submit_test',
 api_bp.add_url_rule('/test-questions', 'get_test_questions',
                     TestController.get_afirmaciones_controller, methods=['GET'])
 
+api_bp.add_url_rule('/test-status', 'get_test_status',
+                    TestController.get_test_status, methods=['GET'])
+
+api_bp.add_url_rule('/reset-test', 'reset_test',
+                    TestController.reset_test, methods=['POST'])
+
 api_bp.add_url_rule('/save-answers', 'save_answers',
                     TestController.save_answers, methods=['POST'])
+
+# Predictions endpoints
+api_bp.add_url_rule('/predict-careers', 'predict_careers',
+                    PredictionsController.predict_careers, methods=['POST'])
 
 # Advisory endpoints
 api_bp.add_url_rule('/advisory-submit', 'book_advisory',

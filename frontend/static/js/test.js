@@ -25,11 +25,11 @@ const SCORE_LABELS = {
 
 // Constantes de habilidades
 const SKILLS_SCORE_LABELS = {
-    1: "Novato",
-    2: "Básico",
-    3: "Intermedio",
-    4: "Avanzado",
-    5: "Experto"
+    1: "Me cuesta mucho realizar esto",
+    2: "Me cuesta un poco",
+    3: "Neutral",
+    4: "Me resulta relativamente fácil",
+    5: "Creo que puedo hacer esto con facilidad"
 };
 
 // Configuración de preguntas por test
@@ -41,10 +41,19 @@ let currentTest = TEST_STATES.RIASEC; // Qué test se está tomando
 let currentPage = 1;
 let riasecAnswers = {}; // { questionId: score }
 let skillsAnswers = {}; // { questionId: score }
-let TEST_QUESTIONS = []; // Preguntas cargadas
+let ALL_QUESTIONS = []; // Todas las preguntas cargadas desde la API (ID 1-42)
+let RIASEC_QUESTIONS = []; // Preguntas filtradas RIASEC (ID 1-30)
+let SKILLS_QUESTIONS = []; // Preguntas filtradas Habilidades (ID 31-42)
+let TEST_QUESTIONS = []; // Referencias dinámicamente según currentTest
 let TOTAL_PAGES = 0;
-let TOTAL_SKILLS_QUESTIONS = 10; // Las pruebas de habilidades tendrán 10 preguntas
+let TOTAL_SKILLS_QUESTIONS = 12; // Las pruebas de habilidades tendrán 12 preguntas (31-42)
 let QUESTIONS_PER_PAGE = RIASEC_QUESTIONS_PER_PAGE;
+
+// Constantes de rangos de IDs
+const RIASEC_ID_MIN = 1;
+const RIASEC_ID_MAX = 30;
+const SKILLS_ID_MIN = 31;
+const SKILLS_ID_MAX = 42;
 
 // QUESTIONS_PER_PAGE se define en test-constants.js
 
@@ -113,6 +122,7 @@ function setCachedQuestions(questions) {
 
 /**
  * Carga las preguntas del test desde la API o del cache
+ * Separa automáticamente entre RIASEC (1-30) e Habilidades (31-42)
  */
 async function loadTestQuestions() {
     try {
@@ -139,15 +149,82 @@ async function loadTestQuestions() {
             setCachedQuestions(questions);
         }
 
-        TEST_QUESTIONS = questions;
-        TOTAL_PAGES = Math.ceil(TEST_QUESTIONS.length / QUESTIONS_PER_PAGE);
+        // Almacenar todas las preguntas
+        ALL_QUESTIONS = questions;
+        
+        // Debug: mostrar los IDs de las preguntas cargadas
+        console.log('IDs cargados:', ALL_QUESTIONS.map(q => q.id));
+        
+        // Separar por rango de ID (convertir a número para comparación segura)
+        RIASEC_QUESTIONS = ALL_QUESTIONS.filter(q => {
+            const id = parseInt(q.id);
+            return id >= RIASEC_ID_MIN && id <= RIASEC_ID_MAX;
+        });
+        
+        SKILLS_QUESTIONS = ALL_QUESTIONS.filter(q => {
+            const id = parseInt(q.id);
+            return id >= SKILLS_ID_MIN && id <= SKILLS_ID_MAX;
+        });
+        
+        console.log(`RIASEC preguntas: ${RIASEC_QUESTIONS.length}, SKILLS preguntas: ${SKILLS_QUESTIONS.length}`);
+        
+        // Cargar respuestas guardadas de la BD
+        await loadSavedAnswers();
         
         return true;
+        
     } catch (error) {
-        console.error('Error al cargar preguntas:', error);
-        alert('Error al cargar las preguntas del test. Intenta de nuevo.');
+        console.error('Error:', error);
+        alert('Error al cargar las preguntas: ' + error.message);
         return false;
     }
+}
+
+/**
+ * Carga las respuestas guardadas en la BD si existen
+ */
+async function loadSavedAnswers() {
+    try {
+        const response = await fetch('/api/test-status', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.status.answers && Object.keys(data.status.answers).length > 0) {
+            console.log('📥 Cargando respuestas guardadas:', data.status.answers);
+            
+            // Restaurar respuestas en memoria
+            Object.entries(data.status.answers).forEach(([questionId, answer]) => {
+                const qId = parseInt(questionId);
+                if (qId >= RIASEC_ID_MIN && qId <= RIASEC_ID_MAX) {
+                    riasecAnswers[questionId] = answer;
+                } else if (qId >= SKILLS_ID_MIN && qId <= SKILLS_ID_MAX) {
+                    skillsAnswers[questionId] = answer;
+                }
+            });
+            
+            console.log('✅ Respuestas restauradas. RIASEC:', riasecAnswers, 'SKILLS:', skillsAnswers);
+        }
+    } catch (error) {
+        console.error('Error cargando respuestas guardadas:', error);
+        // No es fatal - solo continuar sin respuestas previas
+    }
+}
+
+/**
+ * Actualiza TEST_QUESTIONS según el test actual
+ */
+function updateTestQuestions() {
+    if (currentTest === TEST_STATES.RIASEC) {
+        TEST_QUESTIONS = RIASEC_QUESTIONS;
+    } else if (currentTest === TEST_STATES.SKILLS) {
+        TEST_QUESTIONS = SKILLS_QUESTIONS;
+    }
+    
+    TOTAL_PAGES = Math.ceil(TEST_QUESTIONS.length / QUESTIONS_PER_PAGE);
+    console.log(`Test ${currentTest}: ${TEST_QUESTIONS.length} preguntas en ${TOTAL_PAGES} páginas`);
 }
 
 /**
@@ -161,9 +238,11 @@ async function startTest() {
         return;
     }
     
-    // Recuperar respuestas guardadas si existen (para continuar un test en progreso)
-    // Nota: Las respuestas se recuperan desde la BD en el próximo acceso
-    // Por ahora, comenzamos con testAnswers vacío
+    // Resetear posición a la primera página del RIASEC
+    currentTest = TEST_STATES.RIASEC;
+    currentPage = 1;
+    QUESTIONS_PER_PAGE = RIASEC_QUESTIONS_PER_PAGE;
+    updateTestQuestions();
     
     document.getElementById('intro').style.display = 'none';
     document.getElementById('questions').style.display = 'block';
@@ -205,8 +284,12 @@ function loadPage(pageNumber) {
     // Agregar cada pregunta con su slider
     pageQuestions.forEach(question => {
         const score = currentAnswers[question.id] || null; // null = no seleccionado
-        const labelMin = currentTest === TEST_STATES.RIASEC ? 'Me desagrada mucho' : 'Novato';
-        const labelMax = currentTest === TEST_STATES.RIASEC ? 'Me encanta hacerlo' : 'Experto';
+        const labelMin = currentTest === TEST_STATES.RIASEC 
+            ? 'Me desagrada mucho' 
+            : 'Me cuesta mucho realizar esto';
+        const labelMax = currentTest === TEST_STATES.RIASEC 
+            ? 'Me encanta hacerlo' 
+            : 'Creo que puedo hacer esto con facilidad';
         
         html += `
             <div class="question-item">
@@ -389,33 +472,17 @@ async function proceedToNextTest() {
     currentTest = TEST_STATES.SKILLS;
     currentPage = 1;
     QUESTIONS_PER_PAGE = SKILLS_QUESTIONS_PER_PAGE;
-    TOTAL_PAGES = Math.ceil(TOTAL_SKILLS_QUESTIONS / SKILLS_QUESTIONS_PER_PAGE);
     
-    // Las siguientes preguntas se cargarían aquí (placeholder por ahora)
-    // TODO: Cargar preguntas de habilidades desde una fuente
-    TEST_QUESTIONS = generateDummySkillsQuestions();
+    // Actualizar las preguntas según el nuevo test
+    updateTestQuestions();
     
     // Mostrar la primera página del nuevo test
     loadPage(currentPage);
 }
 
 /**
- * Genera preguntas dummy de habilidades (TODO: reemplazar con datos reales)
- */
-function generateDummySkillsQuestions() {
-    const dummyQuestions = [];
-    for (let i = 1; i <= TOTAL_SKILLS_QUESTIONS; i++) {
-        dummyQuestions.push({
-            id: i,
-            text: `Pregunta de Habilidad ${i}: ¿Qué tan competente eres en esta área?`
-        });
-    }
-    return dummyQuestions;
-}
-
-/**
  * Completa todas las pruebas
- * Guarda respuestas finales y muestra resultados (placeholder)
+ * Guarda respuestas finales, calcula perfil RIASEC y redirige a predicciones
  */
 async function completeAllTests() {
     // Guardar respuestas finales
@@ -425,23 +492,71 @@ async function completeAllTests() {
     console.log('Respuestas RIASEC:', riasecAnswers);
     console.log('Respuestas Habilidades:', skillsAnswers);
     
-    // TODO: Aquí se llamaría al endpoint de procesamiento final
-    // Por ahora mostramos un mensaje de éxito
-    document.getElementById('questions').style.display = 'none';
-    document.getElementById('results').style.display = 'block';
+    // Calcular perfil RIASEC del usuario
+    const riasecProfile = calculateRIASECProfile();
+    console.log('Perfil RIASEC calculado:', riasecProfile);
     
-    const completionHtml = `
-        <div class="completion-message">
-            <h2>✓ Tests Completados</h2>
-            <p>Tus respuestas han sido guardadas exitosamente.</p>
-            <p>Nos pondremos en contacto pronto con los resultados de tu evaluación.</p>
-            <div class="result-actions">
-                <a href="/advisory" class="btn btn-primary">Agendar Asesoría</a>
-                <a href="/" class="btn btn-secondary">Volver al Inicio</a>
-            </div>
-        </div>
-    `;
+    // Guardar perfil en localStorage para la página de predicciones
+    localStorage.setItem('riasec_profile', JSON.stringify(riasecProfile));
     
-    document.getElementById('result-career').innerHTML = completionHtml;
-    document.getElementById('result-scores').innerHTML = '';
+    // Redirigir a la página de predicciones con parámetro para recalcular
+    window.location.href = '/predicciones?recalculate=true';
+}
+
+/**
+ * Calcula el perfil RIASEC basado en las respuestas
+ * Las preguntas están mapeadas a categorías RIASEC
+ */
+function calculateRIASECProfile() {
+    // Mapeo de preguntas a categorías RIASEC
+    // Este mapeo debería venir de la BD, pero por ahora lo hacemos en el frontend
+    // Asumiendo que las preguntas están distribuidas equitativamente
+    
+    const riasecMap = {
+        // Preguntas 1-5: Realista (Realistic)
+        1: 'R', 2: 'R', 3: 'R', 4: 'R', 5: 'R',
+        // Preguntas 6-10: Investigador (Investigative)
+        6: 'I', 7: 'I', 8: 'I', 9: 'I', 10: 'I',
+        // Preguntas 11-15: Artístico (Artistic)
+        11: 'A', 12: 'A', 13: 'A', 14: 'A', 15: 'A',
+        // Preguntas 16-20: Social
+        16: 'S', 17: 'S', 18: 'S', 19: 'S', 20: 'S',
+        // Preguntas 21-25: Emprendedor (Enterprising)
+        21: 'E', 22: 'E', 23: 'E', 24: 'E', 25: 'E',
+        // Preguntas 26-30: Convencional (Conventional)
+        26: 'C', 27: 'C', 28: 'C', 29: 'C', 30: 'C'
+    };
+    
+    // Inicializar contadores
+    const categoryScores = {
+        'R': { sum: 0, count: 0 },
+        'I': { sum: 0, count: 0 },
+        'A': { sum: 0, count: 0 },
+        'S': { sum: 0, count: 0 },
+        'E': { sum: 0, count: 0 },
+        'C': { sum: 0, count: 0 }
+    };
+    
+    // Procesar respuestas RIASEC
+    Object.entries(riasecAnswers).forEach(([questionId, score]) => {
+        const qId = parseInt(questionId);
+        const category = riasecMap[qId];
+        
+        if (category && categoryScores[category]) {
+            categoryScores[category].sum += score;
+            categoryScores[category].count += 1;
+        }
+    });
+    
+    // Calcular promedios
+    const profile = {};
+    Object.entries(categoryScores).forEach(([category, data]) => {
+        if (data.count > 0) {
+            profile[category] = data.sum / data.count;
+        } else {
+            profile[category] = 0; // Si no hay respuestas para esta categoría
+        }
+    });
+    
+    return profile;
 }
