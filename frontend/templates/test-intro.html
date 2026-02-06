@@ -12,6 +12,271 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <style>
+        .test-intro-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            min-height: calc(100vh - 150px);
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .test-intro-left {
+            max-width: 700px;
+        }
+
+        .test-intro-right {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .test-status-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-status-panel h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-indicator {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .status-badge.complete {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.incomplete {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-badge.zero {
+            background: #6b7280;
+            color: white;
+        }
+
+        .progress-info {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .status-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .status-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.95em;
+        }
+
+        .status-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .status-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-btn.secondary {
+            background: #f3f4f6;
+            color: #333;
+            border: 2px solid #e5e7eb;
+        }
+
+        .status-btn.secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .status-btn.danger {
+            background: #fee;
+            color: #c33;
+            border: 2px solid #fcc;
+        }
+
+        .status-btn.danger:hover {
+            background: #fdd;
+        }
+
+        /* Loading spinner */
+        .loading-spinner-container {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner-container.showing {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid #667eea;
+            border-color: #667eea transparent #667eea transparent;
+            animation: spinnerRotate 1.2s linear infinite;
+        }
+
+        @keyframes spinnerRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 0.95em;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-modal.showing {
+            display: flex;
+        }
+
+        .confirm-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .confirm-modal-content h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .confirm-modal-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .confirm-modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .confirm-modal-actions button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-modal-actions .btn-cancel {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .confirm-modal-actions .btn-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .test-intro-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .test-intro-right {
+                position: relative;
+                top: auto;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -34,62 +299,102 @@
         </div>
     </nav>
 
-    <section class="auth-section">
-        <div class="auth-container">
-            <div class="auth-form-wrapper">
-                <h1>¡Listo para descubrir tu carrera ideal?</h1>
-                <p class="auth-subtitle">Test de Orientación Vocacional RIASEC</p>
+    <section class="auth-section" style="padding: 0;">
+        <div class="container" style="max-width: 1200px;">
+            <div class="test-intro-wrapper">
+                <!-- Contenido principal -->
+                <div class="test-intro-left">
+                    <div class="auth-form-wrapper">
+                        <h1>¡Listo para descubrir tu carrera ideal?</h1>
+                        <p class="auth-subtitle">Test de Orientación Vocacional RIASEC</p>
 
-                <div id="intro-content" class="intro-content">
-                    <div class="intro-info">
-                        <h2>¿Qué esperar del test?</h2>
-                        
-                        <div class="info-card">
-                            <div class="card-number">📋</div>
-                            <div class="card-content">
-                                <h3>36 Preguntas Reflexivas</h3>
-                                <p>Diseñadas para explorar tus intereses, habilidades y valores profesionales.</p>
+                        <div id="intro-content" class="intro-content">
+                            <div class="intro-info">
+                                <h2>¿Qué esperar del test?</h2>
+                                
+                                <div class="info-card">
+                                    <div class="card-number">📋</div>
+                                    <div class="card-content">
+                                        <h3>42 Preguntas Reflexivas</h3>
+                                        <p>Diseñadas en dos fases: RIASEC (30 preguntas) y Habilidades (12 preguntas).</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="card-number">⏱️</div>
+                                    <div class="card-content">
+                                        <h3>10-15 Minutos de tu Tiempo</h3>
+                                        <p>Una sesión completa que te dará resultados significativos.</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="card-number">🎯</div>
+                                    <div class="card-content">
+                                        <h3>Resultados Personalizados</h3>
+                                        <p>Recomendaciones basadas en el modelo RIASEC de Holland con IA.</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="card-number">🚀</div>
+                                    <div class="card-content">
+                                        <h3>Próximos Pasos</h3>
+                                        <p>Explora todas las carreras relacionadas y agenda una asesoría personalizada.</p>
+                                    </div>
+                                </div>
+
+                                <div class="user-info-display">
+                                    <p><strong>Realizarás el test como:</strong></p>
+                                    <p id="user-display-name" class="user-name-display"></p>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="info-card">
-                            <div class="card-number">⏱️</div>
-                            <div class="card-content">
-                                <h3>8 Minutos de tu Tiempo</h3>
-                                <p>Una sesión rápida que te dará resultados significativos.</p>
+                <!-- Panel de estado -->
+                <div class="test-intro-right">
+                    <div class="test-status-panel">
+                        <h3>📊 Estado de tu Test</h3>
+
+                        <!-- Loading spinner inicial -->
+                        <div class="loading-spinner-container showing" id="loadingSpinner">
+                            <div class="loading-spinner"></div>
+                            <p class="loading-text">Cargando estado del test...</p>
+                        </div>
+
+                        <!-- Contenido del estado (oculto durante carga) -->
+                        <div id="statusContent" style="display: none;">
+                            <div class="status-indicator">
+                                <div class="status-badge" id="statusBadge"></div>
                             </div>
-                        </div>
 
-                        <div class="info-card">
-                            <div class="card-number">🎯</div>
-                            <div class="card-content">
-                                <h3>Resultados Personalizados</h3>
-                                <p>Recomendaciones basadas en el modelo RIASEC de Holland.</p>
+                            <div class="progress-info" id="progressInfo"></div>
+
+                            <div class="progress-bar" id="progressBar">
+                                <div class="progress-bar-fill" id="progressBarFill"></div>
                             </div>
-                        </div>
 
-                        <div class="info-card">
-                            <div class="card-number">🚀</div>
-                            <div class="card-content">
-                                <h3>Próximos Pasos</h3>
-                                <p>Explora carreras relacionadas y agenda una asesoría personalizada.</p>
-                            </div>
-                        </div>
-
-                        <div class="user-info-display">
-                            <p><strong>Realizarás el test como:</strong></p>
-                            <p id="user-display-name" class="user-name-display"></p>
-                        </div>
-
-                        <div class="intro-actions">
-                            <a href="/test/responder" class="btn btn-primary">Empezar Test</a>
-                            <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+                            <div class="status-actions" id="statusActions"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Modal de confirmación -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-modal-content">
+            <h2 id="confirmTitle"></h2>
+            <p id="confirmMessage"></p>
+            <div class="confirm-modal-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-confirm" id="confirmBtn" onclick="executeConfirmAction()">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -100,31 +405,201 @@
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script>
-        // Mostrar nombre del usuario en la página de intro
-        async function loadUserInfoForIntro() {
+        // Variables globales
+        let currentTestStatus = null;
+        let pendingAction = null;
+
+        /**
+         * Carga el estado del test del usuario
+         */
+        async function loadTestStatus() {
+            try {
+                const response = await fetch('/api/test-status', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentTestStatus = data.status;
+                    // Pequeño delay para que se vea la animación de carga (400ms)
+                    setTimeout(() => {
+                        displayTestStatus(data.status);
+                    }, 400);
+                } else {
+                    console.error('Error cargando estado:', data.message);
+                    // Ocultar spinner en caso de error
+                    document.getElementById('loadingSpinner').classList.remove('showing');
+                    document.getElementById('statusContent').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error al cargar estado del test:', error);
+                // Ocultar spinner en caso de error
+                document.getElementById('loadingSpinner').classList.remove('showing');
+                document.getElementById('statusContent').style.display = 'block';
+            }
+        }
+
+        /**
+         * Muestra el estado del test en el panel
+         */
+        function displayTestStatus(status) {
+            const badge = document.getElementById('statusBadge');
+            const progressInfo = document.getElementById('progressInfo');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const statusActions = document.getElementById('statusActions');
+
+            const percentage = (status.answered_questions / status.total_questions) * 100;
+            progressBarFill.style.width = percentage + '%';
+
+            let html = '';
+
+            if (status.status === '0') {
+                // Sin empezar
+                badge.textContent = '🆕 Sin Empezar';
+                badge.className = 'status-badge zero';
+                progressInfo.textContent = `0/${status.total_questions} preguntas respondidas`;
+                
+                html = `<a href="/test/responder" class="status-btn primary">Empezar Test</a>`;
+            } else if (status.status === 'incomplete') {
+                // Incompleto
+                badge.textContent = '⏳ En Progreso';
+                badge.className = 'status-badge incomplete';
+                progressInfo.textContent = `${status.answered_questions}/${status.total_questions} preguntas respondidas`;
+                
+                html = `
+                    <a href="/test/responder" class="status-btn primary">Continuar Test</a>
+                    <button class="status-btn danger" onclick="askResetTest()">🔄 Resetear Respuestas</button>
+                `;
+            } else if (status.status === 'complete') {
+                // Completo
+                badge.textContent = '✅ Completado';
+                badge.className = 'status-badge complete';
+                progressInfo.textContent = `${status.answered_questions}/${status.total_questions} preguntas respondidas`;
+                
+                html = `
+                    <a href="/predicciones" class="status-btn primary">Ver Predicciones</a>
+                    <button class="status-btn secondary" onclick="askResetTest()">🔄 Hacer de Nuevo</button>
+                `;
+            }
+
+            statusActions.innerHTML = html;
+            
+            // Ocultar spinner y mostrar contenido
+            document.getElementById('loadingSpinner').classList.remove('showing');
+            document.getElementById('statusContent').style.display = 'block';
+        }
+
+        /**
+         * Pide confirmación para resetear el test
+         */
+        function askResetTest() {
+            pendingAction = 'reset';
+            showConfirmModal(
+                '¿Resetear Test?',
+                'Se borrarán todas tus respuestas guardadas y empezarás desde cero. ¿Estás seguro?',
+                'Resetear'
+            );
+        }
+
+        /**
+         * Muestra el modal de confirmación
+         */
+        function showConfirmModal(title, message, btnText = 'Confirmar') {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmBtn').textContent = btnText;
+            document.getElementById('confirmModal').classList.add('showing');
+        }
+
+        /**
+         * Cierra el modal de confirmación
+         */
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('showing');
+            pendingAction = null;
+        }
+
+        /**
+         * Ejecuta la acción confirmada
+         */
+        async function executeConfirmAction() {
+            if (pendingAction === 'reset') {
+                try {
+                    // Llamar al endpoint para borrar respuestas en BD
+                    const response = await fetch('/api/reset-test', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        console.error('Error al resetear test:', data.message);
+                        alert('Error al resetear el test. Por favor intenta de nuevo.');
+                        closeConfirmModal();
+                        return;
+                    }
+
+                    // Limpiar localStorage
+                    localStorage.removeItem('test_answers');
+                    localStorage.removeItem('riasec_answers');
+                    localStorage.removeItem('skills_answers');
+                    localStorage.removeItem('riasec_profile');
+                    localStorage.removeItem('test_questions_cache');
+
+                    // Redirigir al test
+                    window.location.href = '/test/responder';
+                } catch (error) {
+                    console.error('Error durante reset:', error);
+                    alert('Error al resetear el test. Por favor intenta de nuevo.');
+                    closeConfirmModal();
+                    return;
+                }
+            }
+            closeConfirmModal();
+        }
+
+        /**
+         * Carga la información del usuario y el estado del test
+         */
+        async function initializeTestIntro() {
             try {
                 const response = await fetch('/api/auth/check-session', {
                     method: 'GET',
                     credentials: 'include'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.authenticated) {
                     const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
                     document.getElementById('user-display-name').textContent = nombreCompleto;
+                    
+                    // Cargar estado del test
+                    loadTestStatus();
                 } else {
-                    // Redirigir a login si no está autenticado
                     window.location.href = '/login';
                 }
             } catch (error) {
-                console.error('Error al verificar sesión:', error);
+                console.error('Error:', error);
                 window.location.href = '/login';
             }
         }
 
-        // Ejecutar cuando carga el documento
-        document.addEventListener('DOMContentLoaded', loadUserInfoForIntro);
+        // Ejecutar cuando carga la página
+        document.addEventListener('DOMContentLoaded', initializeTestIntro);
+
+        // Cerrar modal al clickear fuera
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+            if (e.target.id === 'confirmModal') {
+                closeConfirmModal();
+            }
+        });
     </script>
 </body>
 </html>
