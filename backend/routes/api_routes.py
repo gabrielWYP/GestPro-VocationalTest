@@ -7,6 +7,7 @@ from controllers.advisory_controller import AdvisoryController
 from controllers.career_controller import CareerController
 from controllers.auth_controller import AuthController
 from controllers.predictions_controller import PredictionsController
+from controllers.chat_controller import ChatController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -42,6 +43,12 @@ api_bp.add_url_rule('/save-answers', 'save_answers',
 # Predictions endpoints
 api_bp.add_url_rule('/predict-careers', 'predict_careers',
                     PredictionsController.predict_careers, methods=['POST'])
+
+# Chat endpoints
+api_bp.add_url_rule('/chat/message', 'send_message',
+                    ChatController.send_message, methods=['POST'])
+api_bp.add_url_rule('/chat/reset', 'reset_chat',
+                    ChatController.reset_chat, methods=['POST'])
 
 # Advisory endpoints
 api_bp.add_url_rule('/advisory-submit', 'book_advisory',

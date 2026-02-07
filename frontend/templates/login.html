@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -142,5 +143,9 @@
         });
     </script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+
+    <!-- Chat Widget -->
+    {% include "chat-widget.html" %}
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html>
