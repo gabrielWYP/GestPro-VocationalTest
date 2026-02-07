@@ -4,17 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carreras Disponibles - Test de Orientación Vocacional</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/advisory.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">🎯 Vocational Test</div>
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
             <ul class="nav-menu">
                 <li><a href="/">Inicio</a></li>
                 <li><a href="/careers">Carreras</a></li>
-                <li><a href="/test">Test</a></li>
+                <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -28,22 +45,8 @@
 
     <section class="careers-section">
         <div class="container">
-            <div class="careers-grid">
-                {% for career in careers %}
-                <div class="career-card">
-                    <div class="career-icon">{{ career.icon }}</div>
-                    <h3>{{ career.name }}</h3>
-                    <p class="career-description">{{ career.description }}</p>
-                    <div class="skills">
-                        <h4>Habilidades Clave:</h4>
-                        <ul>
-                            {% for skill in career.skills %}
-                            <li>{{ skill }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="careers-grid" id="careers-grid">
+                <!-- Se cargará dinámicamente -->
             </div>
         </div>
     </section>
@@ -61,5 +64,8 @@
             <p>Ayudándote a encontrar tu camino profesional 🚀</p>
         </div>
     </footer>
+
+    <script src="{{ url_for('static', filename='js/careers-list.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

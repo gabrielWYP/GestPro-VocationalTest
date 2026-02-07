@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Carrera - Test de Orientación Vocacional</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/career-detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test/intro">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <a href="/careers" class="back-link">← Volver a Carreras</a>
+            <h1 id="career-name">Carrera</h1>
+            <p id="career-tagline">Descripción</p>
+        </div>
+    </section>
+
+    <section class="career-detail-section">
+        <div class="container">
+            <div class="career-detail">
+                <div class="career-hero">
+                    <div class="career-icon-large" id="career-icon">🎓</div>
+                    <h2 id="career-title">Carrera</h2>
+                </div>
+
+                <div class="career-content">
+                    <div class="content-block">
+                        <h3>Descripción General</h3>
+                        <p id="career-full-description">Cargando...</p>
+                    </div>
+
+                    <div class="content-block">
+                        <h3>Habilidades Clave</h3>
+                        <ul class="skills-list" id="career-skills">
+                            <li>Cargando...</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-block">
+                        <h3>Salidas Profesionales</h3>
+                        <ul class="skills-list" id="career-jobs">
+                            <li>Cargando...</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-block">
+                        <h3>Requisitos Académicos</h3>
+                        <p id="career-requirements">Cargando...</p>
+                    </div>
+
+                    <div class="content-block cta-block">
+                        <h3>¿Interesado en esta carrera?</h3>
+                        <p>Reserva una asesoría con nuestros expertos para conocer más detalles.</p>
+                        <a href="/advisory" class="btn btn-primary">Agendar Asesoría</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="related-careers">
+                <h3>Carreras Relacionadas</h3>
+                <div class="careers-grid" id="related-grid">
+                    <!-- Se cargará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
+            <p>Ayudándote a encontrar tu camino profesional 🚀</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/career-detail.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

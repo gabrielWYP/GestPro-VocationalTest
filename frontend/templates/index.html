@@ -4,47 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test de Orientación Vocacional</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hero.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">🎯 Vocational Test</div>
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
             <ul class="nav-menu">
                 <li><a href="#" onclick="scrollToSection('inicio')">Inicio</a></li>
                 <li><a href="/careers">Carreras</a></li>
-                <li><a href="/test">Test</a></li>
+                <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
             </ul>
         </div>
     </nav>
 
     <section id="inicio" class="hero">
         <div class="hero-content">
-            <h1>Encuentra tu Carrera Ideal</h1>
-            <p>Un test interactivo y personalizado que te ayudará a descubrir tu vocación</p>
-            <a href="/test" class="btn btn-primary">Comenzar Test</a>
+            <h1>No saber qué estudiar</h1>
+            <h1>es normal.</h1>
+            <p>Te ayudamos a conocerte y explorar el mejor camino para ti.</p>
+            <a href="#" onclick="startTestFlow()" class="btn btn-primary">Empezar Test</a>
         </div>
     </section>
 
     <section class="features">
         <div class="container">
-            <h2>¿Por qué este test?</h2>
+            <h2>Descubre lo que te motiva</h2>
+            <p class="features-subtitle">Toma nuestro test RIASEC y descubre más sobre tus intereses y fortalezas.</p>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="icon">📋</div>
-                    <h3>Test Personalizado</h3>
-                    <p>8 preguntas cuidadosamente diseñadas para analizar tus intereses y habilidades.</p>
+                    <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Discover" class="feature-icon">
+                    <h3>Descubre lo que te motiva</h3>
+                    <p>Toma nuestro test RIASEC y descubre más sobre tus intereses y fortalezas.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon">💼</div>
-                    <h3>8 Carreras</h3>
-                    <p>Explora ocho carreras profesionales populares y en demanda en el mercado actual.</p>
+                    <h3>Explora carreras afines</h3>
+                    <p>Descubre qué carreras se alinean mejor con tus resultados y perfil.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon">👨‍💼</div>
-                    <h3>Asesoría Profesional</h3>
-                    <p>Agenda una asesoría con nuestros orientadores vocacionales para profundizar en tu elección.</p>
+                    <div class="icon">👩‍💼</div>
+                    <h3>Habla con un mentor</h3>
+                    <p>Conversa con estudiantes y egresados para resolver tus dudas.</p>
                 </div>
             </div>
         </div>

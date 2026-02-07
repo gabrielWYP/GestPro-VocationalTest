@@ -20,16 +20,45 @@ def index():
 @page_bp.route('/careers')
 def careers():
     """Página de carreras"""
-    careers_data = CareerService.get_all_careers()
-    return render_template('careers.html', careers=careers_data)
+    return render_template('careers.html')
+
+
+@page_bp.route('/career-detail')
+def career_detail():
+    """Página de detalle de carrera"""
+    return render_template('career-detail.html')
+
+
+@page_bp.route('/login')
+def login():
+    """Página de login"""
+    return render_template('login.html')
+
+
+@page_bp.route('/register')
+def register():
+    """Página de registro"""
+    return render_template('register.html')
+
+
+@page_bp.route('/test/intro')
+def test_intro():
+    """Página de introducción al test (requiere estar logueado)"""
+    return render_template('test-intro.html')
+
+
+@page_bp.route('/test/responder')
+def test_responder():
+    """Página del test vocacional (requiere estar logueado)"""
+    questions = TestService.get_questions()
+    total = len(questions)
+    return render_template('test.html', questions=questions, total=total)
 
 
 @page_bp.route('/test')
 def test():
-    """Página del test vocacional"""
-    questions = TestService.get_questions()
-    total = len(questions)
-    return render_template('test.html', questions=questions, total=total)
+    """Página del test vocacional - redirige a intro"""
+    return test_intro()
 
 
 @page_bp.route('/advisory')
@@ -41,3 +70,9 @@ def advisory():
         booked_slots = []
     
     return render_template('advisory.html', booked_slots=json.dumps(booked_slots))
+
+
+@page_bp.route('/predicciones')
+def predicciones():
+    """Página de predicción de carreras (requiere respuestas completadas)"""
+    return render_template('predicciones.html')

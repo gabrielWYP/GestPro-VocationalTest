@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- Gradientes -->
+    <linearGradient id="gBlue" x1="125" y1="120" x2="255" y2="255" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9AD4E6" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#68bed7" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <linearGradient id="gGreen" x1="125" y1="397" x2="255" y2="255" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A9E39A" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#84cc6e" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <linearGradient id="gYellow" x1="387" y1="120" x2="257" y2="255" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF1B5" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#fde288" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <linearGradient id="gPink" x1="387" y1="397" x2="257" y2="255" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2A0BA" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#e45789" stop-opacity="0.78"/>
+    </linearGradient>
+
+    <!-- Suavizado muy leve de bordes -->
+    <filter id="soft" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="0.6"/>
+    </filter>
+
+    <!-- Glow del destello -->
+    <filter id="glow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Animación (suave) -->
+    <style>
+      /* Pulso del destello: escala + brillo */
+      #sparkle {
+        transform-origin: 256px 256px;
+        animation: sparklePulse 1.8s ease-in-out infinite;
+      }
+      #sparkleGlow {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+
+      @keyframes sparklePulse {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.08); }
+      }
+
+      @keyframes glowPulse {
+        0%, 100% { opacity: 0.85; }
+        50%      { opacity: 1; }
+      }
+
+      /* Respeta accesibilidad */
+      @media (prefers-reduced-motion: reduce) {
+        #sparkle, #sparkleGlow { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- Círculos (1% más separados) -->
+  <circle cx="186" cy="186" r="135" fill="url(#gBlue)"   opacity="0.8" filter="url(#soft)"/>
+  <circle cx="326" cy="186" r="135" fill="url(#gYellow)" opacity="0.8" filter="url(#soft)"/>
+  <circle cx="186" cy="326" r="135" fill="url(#gGreen)"  opacity="0.8" filter="url(#soft)"/>
+  <circle cx="326" cy="326" r="135" fill="url(#gPink)"   opacity="0.8" filter="url(#soft)"/>
+
+  <!-- Destello central animado (misma forma) -->
+  <g id="sparkle">
+    <!-- capa glow (misma forma, solo opacidad animada) -->
+    <path id="sparkleGlow"
+      d="M256 186
+         L270 238
+         L322 256
+         L270 274
+         L256 326
+         L242 274
+         L190 256
+         L242 238 Z"
+      fill="#FFFFFF" opacity="0.9" filter="url(#glow)"/>
+
+    <!-- capa principal (nítida) -->
+    <path
+      d="M256 186
+         L270 238
+         L322 256
+         L270 274
+         L256 326
+         L242 274
+         L190 256
+         L242 238 Z"
+      fill="#FFFFFF"/>
+  </g>
+</svg>
