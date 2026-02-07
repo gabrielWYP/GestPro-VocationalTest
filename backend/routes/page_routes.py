@@ -70,3 +70,9 @@ def advisory():
         booked_slots = []
     
     return render_template('advisory.html', booked_slots=json.dumps(booked_slots))
+
+
+@page_bp.route('/predicciones')
+def predicciones():
+    """Página de predicción de carreras (requiere respuestas completadas)"""
+    return render_template('predicciones.html')
