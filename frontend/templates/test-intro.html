@@ -277,7 +277,6 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -602,9 +601,5 @@
             }
         });
     </script>
-
-    <!-- Chat Widget -->
-    {% include "chat-widget.html" %}
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html>
