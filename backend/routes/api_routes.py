@@ -7,6 +7,7 @@ from controllers.advisory_controller import AdvisoryController
 from controllers.career_controller import CareerController
 from controllers.auth_controller import AuthController
 from controllers.predictions_controller import PredictionsController
+from controllers.visits_controller import VisitsController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -62,3 +63,11 @@ api_bp.add_url_rule('/careers', 'get_all_careers',
                     CareerController.get_all_careers, methods=['GET'])
 api_bp.add_url_rule('/careers/<int:career_id>', 'get_career',
                     CareerController.get_career, methods=['GET'])
+
+# Visits endpoints (para rastrear visitantes anónimos)
+api_bp.add_url_rule('/visits/register', 'register_visit',
+                    VisitsController.register_visit, methods=['POST'])
+api_bp.add_url_rule('/visits/info', 'get_visitor_info',
+                    VisitsController.get_visitor_info, methods=['GET'])
+api_bp.add_url_rule('/visits/statistics', 'get_visit_statistics',
+                    VisitsController.get_statistics, methods=['GET'])
