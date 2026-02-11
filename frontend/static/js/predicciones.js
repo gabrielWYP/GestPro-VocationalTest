@@ -31,33 +31,164 @@ function loadUserProfile() {
 }
 
 /**
- * Muestra el perfil RIASEC en la página
+ * Scroll automático hacia los resultados de carreras
+ */
+function scrollToResults() {
+    const resultsContainer = document.getElementById('resultsContainer');
+    console.log('Intentando scroll a resultsContainer:', resultsContainer);
+    if (resultsContainer && resultsContainer.offsetParent !== null) {
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        // Si no está visible, scroll al botón de predecir
+        const predictBtn = document.getElementById('predictBtn');
+        if (predictBtn) {
+            predictBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+}
+
+/**
+ * Muestra el perfil RIASEC en la página con gráfico radar
  */
 function displayProfile(profile) {
-    const riasecScores = document.getElementById('riasecScores');
-    
     const categories = [
-        { key: 'R', label: 'Realista' },
-        { key: 'I', label: 'Investigador' },
-        { key: 'A', label: 'Artístico' },
-        { key: 'S', label: 'Social' },
-        { key: 'E', label: 'Emprendedor' },
-        { key: 'C', label: 'Convencional' }
+        { key: 'R', label: 'Realista', color: '#ff6b6b' },
+        { key: 'I', label: 'Investigador', color: '#00a8ff' },
+        { key: 'A', label: 'Artístico', color: '#a855f7' },
+        { key: 'S', label: 'Social', color: '#10b981' },
+        { key: 'E', label: 'Emprendedor', color: '#f59e0b' },
+        { key: 'C', label: 'Convencional', color: '#6b7280' }
     ];
     
-    let html = '';
-    categories.forEach(cat => {
-        const score = (profile && profile[cat.key]) ? parseFloat(profile[cat.key]).toFixed(2) : '-';
-        html += `
-            <div class="riasec-score">
-                <div class="label">${cat.key}</div>
-                <div class="label-name" style="font-size: 0.9em; opacity: 0.9;">${cat.label}</div>
-                <div class="value">${score}</div>
-            </div>
-        `;
-    });
+    const labels = categories.map(cat => cat.label);
+    const scores = categories.map(cat => (profile && profile[cat.key]) ? parseFloat(profile[cat.key]) : 0);
+    const colors = categories.map(cat => cat.color);
     
-    riasecScores.innerHTML = html;
+    // Encontrar la dimensión con mayor valor
+    let maxIndex = 0;
+    let maxValue = 0;
+    scores.forEach((score, index) => {
+        if (score > maxValue) {
+            maxValue = score;
+            maxIndex = index;
+        }
+    });
+    const maxDimensionLabel = labels[maxIndex] || 'equilibrado';
+    const maxDimensionColor = colors[maxIndex] || '#333';
+    
+    // Actualizar el título fuera del canvas
+    const titleElement = document.getElementById('riasecTitle');
+    titleElement.innerHTML = `¡Tienes un perfil <span style="color: ${maxDimensionColor}; font-weight: 900;">${maxDimensionLabel}</span>!`;
+    
+    // Obtener elemento canvas
+    const ctx = document.getElementById('riasecChart');
+    
+    // Destruir gráfico anterior si existe
+    if (window.riasecChartInstance) {
+        window.riasecChartInstance.destroy();
+    }
+    
+    // Crear gráfico radar con hexágono
+    window.riasecChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: scores,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.15)',
+                borderWidth: 3,
+                pointBackgroundColor: colors,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                pointRadius: 7,
+                pointHoverRadius: 10,
+                pointHoverBorderWidth: 4,
+                fill: true,
+                tension: 0.0,
+                shadowBlur: 20,
+                shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                filler: {
+                    propagate: true
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 7,
+                    ticks: {
+                        stepSize: 1,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: "'Poppins', sans-serif"
+                        },
+                        callback: function(value) {
+                            return value;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.08)',
+                        lineWidth: 2,
+                        circular: true
+                    },
+                    pointLabels: {
+                        font: function(context) {
+                            const index = context.index;
+                            const isMax = index === maxIndex;
+                            return {
+                                size: isMax ? 20 : 17,
+                                weight: isMax ? '900' : '700',
+                                family: "'Poppins', sans-serif"
+                            };
+                        },
+                        padding: 15,
+                        backdropColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropPadding: 12,
+                        color: function(context) {
+                            return colors[context.index];
+                        },
+                        callback: function(label, index) {
+                            const score = scores[index];
+                            return `${label}: ${score.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false
+            }
+        },
+        plugins: [{
+            id: 'customCanvasBackgroundColor',
+            afterDraw(chart) {
+                // Efecto de brillo en los puntos
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.beginPath();
+                ctx.arc(chart.chartArea.left + chart.chartArea.width / 2, 
+                        chart.chartArea.top + chart.chartArea.height / 2, 
+                        chart.chartArea.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }]
+    });
 }
 
 /**
@@ -88,8 +219,11 @@ async function predictCareers() {
             // Guardar resultados en localStorage
             localStorage.setItem('prediction_results', JSON.stringify(data));
             
-            // Mostrar el perfil RIASEC calculado desde BD
-            if (data.user_profile) {
+            // Mostrar el perfil RIASEC escalado a 1-7 (o original si no viene escalado)
+            if (data.user_profile_scaled) {
+                displayProfile(data.user_profile_scaled);
+                localStorage.setItem('riasec_profile', JSON.stringify(data.user_profile_scaled));
+            } else if (data.user_profile) {
                 displayProfile(data.user_profile);
                 localStorage.setItem('riasec_profile', JSON.stringify(data.user_profile));
             }

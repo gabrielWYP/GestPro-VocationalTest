@@ -76,6 +76,12 @@ jobs:
           ORACLE_USER=${ORACLE_USER}
           ORACLE_PASSWORD=${ORACLE_PASSWORD}
           ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
+          GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+          CHAT_TEMPERATURE=${{ secrets.CHAT_TEMPERATURE }}
+          CHAT_SESSION_TIMEOUT=${{ secrets.CHAT_SESSION_TIMEOUT }}
+          CHAT_RATE_LIMIT=${{ secrets.CHAT_RATE_LIMIT }}
+          CHAT_MAX_RESPONSE_TOKENS=${{ secrets.CHAT_MAX_RESPONSE_TOKENS }}
+          CHAT_MAX_MESSAGE_LENGTH=${{ secrets.CHAT_MAX_MESSAGE_LENGTH }}
           EOF
           
           # PASO 1: Detener solo vocational-test-app (Nginx sigue corriendo)
