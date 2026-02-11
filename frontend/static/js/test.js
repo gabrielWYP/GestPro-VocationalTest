@@ -258,6 +258,9 @@ function loadPage(pageNumber) {
         return;
     }
     
+    // Scroll automático al inicio de la página
+    window.scrollTo(0, 0);
+    
     currentPage = pageNumber;
     const pageQuestions = getQuestionsForPage(pageNumber);
     
