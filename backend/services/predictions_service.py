@@ -221,6 +221,12 @@ class PredictionsService:
             # La mejor ocupación es la primera del top 5
             best_occupation = top_occupations[0]
             
+            # Crear perfil escalado a 1-7 para mostrar en frontend
+            riasec_profile_scaled = {
+                cat: float((riasec_code_profile.get(cat, 3) * 1.5 - 0.5))
+                for cat in riasec_order
+            }
+            
             logger.info(f"Top 5 ocupaciones predichas:")
             for i, occ in enumerate(top_occupations, 1):
                 logger.info(f"  {i}. {occ['name']} ({occ['similarity']:.4f})")
@@ -234,7 +240,8 @@ class PredictionsService:
                 },
                 'suggested_careers': best_occupation['carreras'],
                 'top_occupations': top_occupations,
-                'user_profile': riasec_code_profile
+                'user_profile': riasec_code_profile,
+                'user_profile_scaled': riasec_profile_scaled
             }
             
         except DatabaseError as e:

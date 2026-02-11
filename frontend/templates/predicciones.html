@@ -368,6 +368,39 @@
         .error-message.showing {
             display: block;
         }
+
+        @keyframes bounceDown {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(15px);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .profile-summary > div {
+                grid-template-columns: 1fr !important;
+                min-height: auto !important;
+            }
+
+            .profile-summary > div > :last-child {
+                order: 2;
+            }
+        }
     </style>
 </head>
 <body>
@@ -399,10 +432,19 @@
                     <p>Basado en tus respuestas, analizamos qué carreras se ajustan mejor a tu perfil</p>
                 </div>
 
-                <div class="profile-summary" id="profileSummary">
-                    <h2>Tu Perfil RIASEC</h2>
-                    <div class="riasec-scores" id="riasecScores">
-                        <!-- Se completa con JavaScript -->
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;">
+                    <!-- Caja original del Canvas -->
+                    <div class="profile-summary" id="profileSummary">
+                        <div id="riasecTitle" style="text-align: center; margin-bottom: 20px; font-size: 1.8em; font-weight: 700; color: #333;"></div>
+                        <div style="max-width: 650px; margin: 0 auto; height: 500px;">
+                            <canvas id="riasecChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Caja invisible para la flecha -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; justify-content: center;" onclick="scrollToResults()">
+                        <div style="font-size: 0.95em; font-weight: 700; color: #667eea; text-align: center;">Revisa tus carreras</div>
+                        <div style="font-size: 2.5em; animation: bounceDown 2s infinite;">⬇️</div>
                     </div>
                 </div>
 
@@ -443,6 +485,7 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/predicciones.js') }}"></script>
 </body>
 </html>
