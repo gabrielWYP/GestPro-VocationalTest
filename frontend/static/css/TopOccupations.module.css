@@ -1,0 +1,104 @@
+.occupationsSection {
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #fafbfc 0%, #f0f4f8 100%);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: #718096;
+  margin: 0;
+  font-weight: 400;
+}
+
+.occupationsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* Responsive: Si no cabe 5 columnas, usar 3 + 2 centrado */
+@media (max-width: 1400px) {
+  .occupationsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .occupationsGrid > :nth-child(4),
+  .occupationsGrid > :nth-child(5) {
+    grid-column: span 1;
+  }
+
+  /* Centrar los últimos 2 elementos en la segunda fila */
+  .occupationsGrid {
+    justify-items: center;
+  }
+
+  .occupationsGrid > :nth-child(n + 4) {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* Tablet: 2 columnas */
+@media (max-width: 768px) {
+  .occupationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile: 1 columna */
+@media (max-width: 480px) {
+  .occupationsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .occupationsSection {
+    padding: 40px 16px;
+  }
+}

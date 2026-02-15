@@ -1,0 +1,260 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #ffffff;
+}
+
+.occupations-section {
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #fafbfc 0%, #f0f4f8 100%);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: #718096;
+  margin: 0;
+  font-weight: 400;
+}
+
+.occupations-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* Cards base */
+.occupation-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 1;
+  padding: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.occupation-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* Esquemas de colores pastel suave */
+.occupation-card.lila {
+  background: linear-gradient(135deg, rgba(232, 213, 242, 0.8) 0%, rgba(216, 180, 254, 0.6) 100%);
+}
+
+.occupation-card.celeste {
+  background: linear-gradient(135deg, rgba(212, 232, 247, 0.8) 0%, rgba(179, 229, 252, 0.6) 100%);
+}
+
+.occupation-card.menta {
+  background: linear-gradient(135deg, rgba(212, 240, 232, 0.8) 0%, rgba(167, 243, 208, 0.6) 100%);
+}
+
+.occupation-card.durazno {
+  background: linear-gradient(135deg, rgba(245, 212, 200, 0.8) 0%, rgba(251, 191, 126, 0.6) 100%);
+}
+
+.occupation-card.rosado {
+  background: linear-gradient(135deg, rgba(240, 212, 232, 0.8) 0%, rgba(243, 179, 217, 0.6) 100%);
+}
+
+/* Badge de porcentaje */
+.percentage-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a202c;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Nombre de la ocupación */
+.occupation-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 16px 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 20px;
+  word-break: break-word;
+}
+
+/* Contenedor de barra de progreso */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Barra de progreso con gradiente arcoíris suave */
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #B3E5FC 0%, 
+    #A8D5BA 25%, 
+    #FFE082 50%, 
+    #FFCCB3 75%, 
+    #F8BBD0 100%);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Texto de compatibilidad */
+.compatibility-text {
+  font-size: 0.8rem;
+  color: #4a5568;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* ============= RESPONSIVE ============= */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1400px) {
+  .occupations-grid {
+    grid-template-columns: repeat(3, 1fr);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    justify-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .occupations-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .occupation-card {
+    padding: 24px;
+  }
+
+  .occupation-name {
+    font-size: 0.95rem;
+    margin-top: 24px;
+  }
+
+  .percentage-badge {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .occupations-section {
+    padding: 40px 16px;
+  }
+
+  .occupations-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .occupation-card {
+    padding: 20px;
+    aspect-ratio: auto;
+    min-height: 200px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .occupation-name {
+    font-size: 0.9rem;
+    margin-top: 18px;
+    -webkit-line-clamp: 3;
+  }
+
+  .percentage-badge {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .progress-container {
+    height: 6px;
+    margin: 10px 0;
+  }
+
+  .compatibility-text {
+    font-size: 0.75rem;
+  }
+}

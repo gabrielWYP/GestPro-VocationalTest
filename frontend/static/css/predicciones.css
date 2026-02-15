@@ -13,7 +13,7 @@
 
 .predicciones-header {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
 }
 
 .predicciones-header h1 {
@@ -101,7 +101,7 @@
 
 .predict-btn-container {
     text-align: center;
-    margin: 40px 0;
+    margin: 8px 0 40px 0;
 }
 
 .predict-btn {
@@ -179,21 +179,26 @@
 /* Grid de ocupaciones top 5 */
 .occupations-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 40px;
     margin-top: 30px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .occupation-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 25px;
+    background: linear-gradient(135deg, #D4E8F7 0%, #D4E8F7 25%, #FFFEF5 50%, #FFE8E8 75%, #E8F5EA 100%);
+    background-size: 200% 200%;
+    color: #333;
+    padding: 6px 16px;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 3px solid transparent;
     animation: slideUp 0.5s ease;
+    font-weight: 700;
 }
 
 .occupation-card:hover {
@@ -202,8 +207,8 @@
 }
 
 .occupation-card.active {
-    border-color: #ffd700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    border-color: #003d7a;
+    box-shadow: 0 0 20px rgba(0, 61, 122, 0.6);
     transform: scale(1.05);
 }
 
@@ -212,18 +217,19 @@
 }
 
 .occupation-card-content h3 {
-    margin: 0 0 15px 0;
-    font-size: 1.1em;
-    font-weight: 600;
+    margin: 0 0 4px 0;
+    font-size: 0.95em;
+    font-weight: 700;
 }
 
 .occupation-card-content .similarity-badge {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 4px 10px;
     border-radius: 20px;
     font-weight: 700;
-    font-size: 1.1em;
+    font-size: 0.88em;
+    color: #333;
 }
 
 .results-container {
@@ -285,17 +291,22 @@
 
 .careers-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    justify-items: center;
 }
 
 .career-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
+    background: linear-gradient(135deg, #D4E8F7 0%, #D4E8F7 25%, #FFFEF5 50%, #FFE8E8 75%, #E8F5EA 100%);
+    background-size: 200% 200%;
+    color: #333;
+    padding: 6px 16px;
     border-radius: 10px;
     text-align: center;
     transition: transform 0.3s ease;
+    width: 100%;
+    max-width: 280px;
+    font-weight: 600;
 }
 
 .career-card:hover {
@@ -304,6 +315,12 @@
 
 .career-card h4 {
     margin: 0;
+    font-size: 1em;
+    font-weight: 600;
+    color: #333333;
+    line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .action-buttons {
@@ -363,6 +380,17 @@
     }
     50% {
         transform: translateY(15px);
+        opacity: 0.7;
+    }
+}
+
+@keyframes bounceLeftRight {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-10px);
         opacity: 0.7;
     }
 }
