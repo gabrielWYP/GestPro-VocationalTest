@@ -255,7 +255,6 @@
     background: white;
     padding: 1.5rem;
     border-radius: 12px;
-    border-left: 4px solid var(--primary-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -293,17 +292,29 @@
     margin-top: 1.5rem;
 }
 
-.score-labels {
+/* Estilos para labels y botones en la misma línea */
+.buttons-with-labels {
     display: flex;
-    justify-content: space-between;
-    font-size: 1.1rem;
-    color: var(--text-light);
-    margin-bottom: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-.label-min, .label-max {
+.label-min {
     font-weight: 500;
-    color: var(--text-color);
+    color: #c041d9;
+    min-width: 120px;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.label-max {
+    font-weight: 500;
+    color: #5dbd3f;
+    min-width: 120px;
+    text-align: left;
+    font-size: 0.95rem;
 }
 
 /* Contenedor de botones */
@@ -312,14 +323,13 @@
     justify-content: center;
     align-items: center;
     gap: 1.2rem;
-    margin-bottom: 1rem;
 }
 
 /* Estilos base para los botones */
 .score-btn {
-    border: none;
-    background: #8b8b8b;
-    color: white;
+    border: 3px solid #9d9d9d;
+    background: transparent;
+    color: transparent;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -335,11 +345,13 @@
 .score-btn-1 {
     width: 60px;
     height: 60px;
+    border-color: #c041d9;
 }
 
 .score-btn-2 {
     width: 50px;
     height: 50px;
+    border-color: #c041d9;
 }
 
 .score-btn-3 {
@@ -350,20 +362,18 @@
 .score-btn-4 {
     width: 50px;
     height: 50px;
+    border-color: #5dbd3f;
 }
 
 .score-btn-5 {
     width: 60px;
     height: 60px;
+    border-color: #5dbd3f;
 }
 
-/* Estado no seleccionado - gris plomo */
-.score-btn {
-    background: #707070;
-}
-
+/* Estado no seleccionado - gris plomo vacío */
 .score-btn:hover:not(.selected) {
-    background: #808080;
+    border-color: #757575;
     transform: scale(1.1);
 }
 
@@ -374,30 +384,40 @@
     transform: scale(1.1);
 }
 
-/* Colores para valores seleccionados */
+/* Colores para valores seleccionados - relleno con borde del color (pastel) */
 .score-btn-1.selected {
-    background: #c041d9; /* Púrpura */
+    background: #e6b3f0; /* Púrpura pastel */
+    border-color: #d89fe8;
+    color: #6b4c7a;
 }
 
 .score-btn-2.selected {
-    background: #9d44cc; /* Púrpura más oscuro */
+    background: #d89fe8; /* Púrpura pastel más oscuro */
+    border-color: #ca8bd8;
+    color: #6b4c7a;
 }
 
 .score-btn-3.selected {
-    background: #6c7a8f; /* Gris azulado neutral */
+    background: #b8d4f1; /* Azul pastel neutral */
+    border-color: #a0bfe6;
+    color: #4a5a7a;
 }
 
 .score-btn-4.selected {
-    background: #7ac74f; /* Verde lima */
+    background: #c9f0b8; /* Verde pastel */
+    border-color: #b8e6a0;
+    color: #4a7a3a;
 }
 
 .score-btn-5.selected {
-    background: #5dbd3f; /* Verde lima más oscuro */
+    background: #b8e6a0; /* Verde pastel más oscuro */
+    border-color: #a0d988;
+    color: #3a6a2a;
 }
 
-/* Número dentro del botón */
+/* Número dentro del botón - oculto */
 .score-btn-number {
-    display: block;
+    display: none;
 }
 
 /* Feedback de respuesta */
@@ -461,6 +481,17 @@
         gap: 0.5rem;
     }
 
+    .buttons-with-labels {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .label-min,
+    .label-max {
+        min-width: auto;
+        text-align: center;
+    }
+
     .score-buttons {
         flex-wrap: wrap;
         gap: 0.3rem;
@@ -498,10 +529,6 @@
     .navigation .btn {
         width: 100%;
         min-width: unset;
-    }
-
-    .score-feedback {
-        font-size: 0.85rem;
     }
 }
 

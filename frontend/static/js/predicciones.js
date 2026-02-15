@@ -60,6 +60,9 @@ function displayProfile(profile) {
         { key: 'C', label: 'Convencional', color: '#6b7280' }
     ];
     
+    // Inicializar hover index
+    window.riasecHoverIndex = -1;
+    
     const labels = categories.map(cat => cat.label);
     const scores = categories.map(cat => (profile && profile[cat.key]) ? parseFloat(profile[cat.key]) : 0);
     const colors = categories.map(cat => cat.color);
@@ -150,8 +153,14 @@ function displayProfile(profile) {
                         font: function(context) {
                             const index = context.index;
                             const isMax = index === maxIndex;
+                            const isHovered = index === window.riasecHoverIndex;
+                            
+                            // Tamaño base pequeño, agrandado al hover
+                            const baseSize = isMax ? 16 : 12;
+                            const hoverSize = isMax ? 24 : 18;
+                            
                             return {
-                                size: isMax ? 20 : 17,
+                                size: isHovered ? hoverSize : baseSize,
                                 weight: isMax ? '900' : '700',
                                 family: "'Poppins', sans-serif"
                             };
@@ -188,6 +197,47 @@ function displayProfile(profile) {
                 ctx.restore();
             }
         }]
+    });
+
+    // Agregar evento de mouse al canvas para efecto hover en etiquetas
+    ctx.addEventListener('mousemove', (event) => {
+        const rect = ctx.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const centerX = ctx.width / 2;
+        const centerY = ctx.height / 2;
+        const radius = Math.min(ctx.width, ctx.height) / 2 - 40;
+        
+        let previousHoverIndex = window.riasecHoverIndex;
+        let hoverIndex = -1;
+        
+        // Calcular distancia desde el centro
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * 60 - 90) * (Math.PI / 180);
+            const px = centerX + radius * Math.cos(angle);
+            const py = centerY + radius * Math.sin(angle);
+            
+            const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+            if (dist < 40) {
+                hoverIndex = i;
+                break;
+            }
+        }
+        
+        window.riasecHoverIndex = hoverIndex;
+        
+        // Redibujar si cambió el hover
+        if (previousHoverIndex !== hoverIndex) {
+            window.riasecChartInstance.update('none');
+        }
+    });
+
+    ctx.addEventListener('mouseleave', () => {
+        if (window.riasecHoverIndex !== -1) {
+            window.riasecHoverIndex = -1;
+            window.riasecChartInstance.update('none');
+        }
     });
 }
 
@@ -261,14 +311,22 @@ function displayResults(data) {
         const card = document.createElement('div');
         card.className = 'occupation-card';
         card.style.animationDelay = `${index * 0.1}s`;
+        card.style.background = '#f3f9ff';
+        card.style.color = '#4a4a4a';
+        card.style.border = '2px solid transparent';
+        card.style.backgroundImage = 'linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%)';
+        card.style.backgroundOrigin = 'border-box';
+        card.style.backgroundClip = 'padding-box, border-box';
+        card.style.boxShadow = '0 2px 6px rgba(60, 60, 60, 0.12)';
+        card.style.padding = '6px 16px';
         card.onclick = () => displayCareersForOccupation(occ);
         
         const similarityPercent = (occ.similarity * 100).toFixed(1);
         
         card.innerHTML = `
             <div class="occupation-card-content">
-                <h3>${occ.name}</h3>
-                <div class="similarity-badge">${similarityPercent}%</div>
+                <h3 style="margin: 0 0 4px 0; font-size: 0.95em; font-weight: 900; color: #1a1a1a;">${occ.name}</h3>
+                <div class="similarity-badge" style="font-size: 0.88em; color: #666;">${similarityPercent}%</div>
             </div>
         `;
         
@@ -313,8 +371,8 @@ function displayCareersForOccupation(occupation) {
     if (occupation.carreras && occupation.carreras.length > 0) {
         occupation.carreras.forEach((carrera, index) => {
             careersHtml += `
-                <div class="career-card" style="animation-delay: ${index * 0.1}s;">
-                    <h4>${carrera}</h4>
+                <div class="career-card" style="animation-delay: ${index * 0.1}s; background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); padding: 6px 16px; display: flex; align-items: center; justify-content: center;">
+                    <h4 style="margin: 0; font-size: 1em; font-weight: 600; color: #333333; line-height: 1.3; word-wrap: break-word; overflow-wrap: break-word;">${carrera}</h4>
                 </div>
             `;
         });
