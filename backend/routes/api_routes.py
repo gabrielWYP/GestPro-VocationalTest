@@ -8,6 +8,7 @@ from controllers.career_controller import CareerController
 from controllers.auth_controller import AuthController
 from controllers.predictions_controller import PredictionsController
 from controllers.visits_controller import VisitsController
+from controllers.nps_controller import NpsController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -43,6 +44,8 @@ api_bp.add_url_rule('/save-answers', 'save_answers',
 # Predictions endpoints
 api_bp.add_url_rule('/predict-careers', 'predict_careers',
                     PredictionsController.predict_careers, methods=['POST'])
+api_bp.add_url_rule('/occupations', 'get_occupations',
+                    PredictionsController.get_occupations, methods=['GET'])
 
 # Advisory endpoints
 api_bp.add_url_rule('/advisory-submit', 'book_advisory',
@@ -71,3 +74,13 @@ api_bp.add_url_rule('/visits/info', 'get_visitor_info',
                     VisitsController.get_visitor_info, methods=['GET'])
 api_bp.add_url_rule('/visits/statistics', 'get_visit_statistics',
                     VisitsController.get_statistics, methods=['GET'])
+
+# NPS endpoints
+api_bp.add_url_rule('/nps/check', 'nps_check',
+                    NpsController.check_eligibility, methods=['GET'])
+api_bp.add_url_rule('/nps/update-time', 'nps_update_time',
+                    NpsController.update_time, methods=['POST'])
+api_bp.add_url_rule('/nps/submit', 'nps_submit',
+                    NpsController.submit_response, methods=['POST'])
+api_bp.add_url_rule('/nps/status', 'nps_status',
+                    NpsController.get_status, methods=['GET'])

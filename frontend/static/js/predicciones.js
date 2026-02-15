@@ -296,6 +296,7 @@ function displayResults(data) {
 
 /**
  * Muestra las carreras sugeridas para una ocupación específica
+ * Prioriza carreras peruanas (carreras_peru), con fallback a carreras USA
  */
 function displayCareersForOccupation(occupation) {
     const careersList = document.getElementById('careersList');
@@ -308,9 +309,23 @@ function displayCareersForOccupation(occupation) {
         }
     });
     
-    // Llenar lista de carreras
     let careersHtml = '';
-    if (occupation.carreras && occupation.carreras.length > 0) {
+    
+    // Mostrar carreras peruanas si existen
+    const carrerasPeru = occupation.carreras_peru || [];
+    if (carrerasPeru.length > 0) {
+        carrerasPeru.forEach((carrera, index) => {
+            const relevancia = carrera.relevancia || 0;
+            const relevanciaColor = relevancia >= 80 ? '#10b981' : relevancia >= 50 ? '#f59e0b' : '#6b7280';
+            careersHtml += `
+                <div class="career-card" style="animation-delay: ${index * 0.1}s;">
+                    <h4>${carrera.nombre}</h4>
+                    <span style="font-size: 0.8em; color: ${relevanciaColor}; font-weight: 600;">Afinidad: ${relevancia}%</span>
+                </div>
+            `;
+        });
+    } else if (occupation.carreras && occupation.carreras.length > 0) {
+        // Fallback a carreras USA si no hay peruanas
         occupation.carreras.forEach((carrera, index) => {
             careersHtml += `
                 <div class="career-card" style="animation-delay: ${index * 0.1}s;">

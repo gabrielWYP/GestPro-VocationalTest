@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
     <style>
         .test-intro-wrapper {
             display: grid;
@@ -601,5 +602,9 @@
             }
         });
     </script>
+
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>
