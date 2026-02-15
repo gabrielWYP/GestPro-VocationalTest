@@ -144,6 +144,57 @@ class PredictionsService:
             raise DatabaseError(f"Error cargando modelo: {str(e)}")
     
     @staticmethod
+    def get_matched_careers_peru(occupation_ids: list) -> dict:
+        """
+        Obtiene las carreras peruanas matcheadas para una lista de ocupaciones
+        usando la tabla MATCH_OCUPACION_CARRERA + CARRERAS_NUEVO.
+        
+        Args:
+            occupation_ids: Lista de IDs de ocupaciones de MODELO_CONVERSIONES
+            
+        Returns:
+            dict con {occupation_id: [lista de carreras peruanas]}
+        """
+        try:
+            with OracleConnection() as conn:
+                with conn.cursor() as cursor:
+                    # Crear placeholders para IN clause
+                    placeholders = ','.join([f':id{i}' for i in range(len(occupation_ids))])
+                    params = {f'id{i}': oid for i, oid in enumerate(occupation_ids)}
+                    
+                    query = f"""
+                    SELECT 
+                        m.ID_OCUPACION,
+                        c.ID,
+                        c.CARRERA,
+                        m.RELEVANCIA
+                    FROM {ORACLE_SCHEMA}.MATCH_OCUPACION_CARRERA m
+                    JOIN {ORACLE_SCHEMA}.CARRERAS_NUEVO c ON m.ID_CARRERA = c.ID
+                    WHERE m.ID_OCUPACION IN ({placeholders})
+                    ORDER BY m.ID_OCUPACION, m.RELEVANCIA DESC
+                    """
+                    
+                    cursor.execute(query, params)
+                    results = cursor.fetchall()
+                    
+                    # Agrupar por ocupación
+                    careers_by_occupation = {oid: [] for oid in occupation_ids}
+                    for row in results:
+                        occ_id = row[0]
+                        careers_by_occupation[occ_id].append({
+                            'id': row[1],
+                            'nombre': row[2],
+                            'relevancia': int(row[3]) if row[3] is not None else 0
+                        })
+                    
+                    logger.info(f"Carreras peruanas obtenidas para {len(occupation_ids)} ocupaciones")
+                    return careers_by_occupation
+                    
+        except Exception as e:
+            logger.error(f"Error obteniendo carreras peruanas matcheadas: {str(e)}")
+            return {oid: [] for oid in occupation_ids}
+
+    @staticmethod
     def predict_careers(usuario_id: int) -> dict:
         """
         Predice las mejores carreras para un usuario usando cosine similarity
@@ -218,6 +269,14 @@ class PredictionsService:
                     'carreras': occ['carreras']
                 })
             
+            # Obtener carreras peruanas matcheadas para el top 5
+            top_ids = [occ['id'] for occ in top_occupations]
+            carreras_peru = PredictionsService.get_matched_careers_peru(top_ids)
+            
+            # Agregar carreras peruanas a cada ocupación del top 5
+            for occ in top_occupations:
+                occ['carreras_peru'] = carreras_peru.get(occ['id'], [])
+            
             # La mejor ocupación es la primera del top 5
             best_occupation = top_occupations[0]
             
@@ -239,6 +298,7 @@ class PredictionsService:
                     'similarity': best_occupation['similarity']
                 },
                 'suggested_careers': best_occupation['carreras'],
+                'suggested_careers_peru': best_occupation['carreras_peru'],
                 'top_occupations': top_occupations,
                 'user_profile': riasec_code_profile,
                 'user_profile_scaled': riasec_profile_scaled
@@ -250,3 +310,58 @@ class PredictionsService:
                 'success': False,
                 'message': str(e)
             }
+
+    @staticmethod
+    def get_all_occupations() -> list:
+        """
+        Obtiene todas las ocupaciones con sus posibles carreras
+        desde la tabla MODELO_CONVERSIONES.
+        
+        Returns:
+            list de dicts con {id, ocupacion, posibles_carreras}
+        """
+        try:
+            with OracleConnection() as conn:
+                with conn.cursor() as cursor:
+                    query = f"""
+                    SELECT 
+                        ID,
+                        OCUPACION,
+                        CAST(POSIBLES_CARRERAS AS VARCHAR2(4000)) as POSIBLES_CARRERAS
+                    FROM {ORACLE_SCHEMA}.MODELO_CONVERSIONES
+                    ORDER BY ID
+                    """
+                    
+                    cursor.execute(query)
+                    results = cursor.fetchall()
+                    
+                    occupations = []
+                    for row in results:
+                        carreras_data = row[2]
+                        carreras_list = []
+                        
+                        if carreras_data is not None:
+                            if hasattr(carreras_data, 'read'):
+                                carreras_str = carreras_data.read()
+                            else:
+                                carreras_str = str(carreras_data)
+                            
+                            if carreras_str.strip():
+                                try:
+                                    carreras_list = ast.literal_eval(carreras_str)
+                                    if not isinstance(carreras_list, list):
+                                        carreras_list = [carreras_list]
+                                except (ValueError, SyntaxError):
+                                    carreras_list = [carreras_str]
+                        
+                        occupations.append({
+                            'id': row[0],
+                            'ocupacion': row[1],
+                            'posibles_carreras': carreras_list
+                        })
+                    
+                    return occupations
+                    
+        except Exception as e:
+            logger.error(f"Error obteniendo ocupaciones: {str(e)}")
+            raise DatabaseError(f"Error obteniendo ocupaciones: {str(e)}")
