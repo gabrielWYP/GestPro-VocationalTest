@@ -244,6 +244,12 @@ async function startTest() {
     QUESTIONS_PER_PAGE = RIASEC_QUESTIONS_PER_PAGE;
     updateTestQuestions();
     
+    // Aplicar el gradiente a la barra de progreso
+    const progressBar = document.getElementById('progress');
+    if (progressBar) {
+        progressBar.style.background = 'linear-gradient(90deg, #A8D8FF 0%, #BFE6FF 30%, #CFF3D8 60%, #FFE6A7 100%)';
+    }
+    
     document.getElementById('intro').style.display = 'none';
     document.getElementById('questions').style.display = 'block';
     loadPage(currentPage);
@@ -272,12 +278,14 @@ function loadPage(pageNumber) {
     const testTitle = currentTest === TEST_STATES.RIASEC 
         ? 'Prueba 1: Orientación Vocacional (RIASEC)' 
         : 'Prueba 2: Evaluación de Habilidades';
+    
+    document.getElementById('test-title').innerHTML = `<h1>${testTitle}</h1>`;
     document.getElementById('test-title').innerHTML = `<h3>${testTitle}</h3>`;
     
     // Construir HTML de la página
     let html = `
         <div class="page-header">
-            <h2>Página ${pageNumber} de ${TOTAL_PAGES}</h2>
+            <h2 style="color: #3d2817;">Página ${pageNumber} de ${TOTAL_PAGES}</h2>
             <p class="page-progress">Preguntas ${(pageNumber - 1) * QUESTIONS_PER_PAGE + 1} a ${Math.min(pageNumber * QUESTIONS_PER_PAGE, TEST_QUESTIONS.length)}</p>
         </div>
         
@@ -296,25 +304,21 @@ function loadPage(pageNumber) {
         
         html += `
             <div class="question-item">
-                <div class="question-header">
-                    <h4>Pregunta ${question.id}</h4>
-                </div>
                 <p class="question-text">${question.text}</p>
                 
                 <div class="score-buttons-container">
-                    <div class="score-labels">
+                    <div class="buttons-with-labels">
                         <span class="label-min">${labelMin}</span>
+                        <div class="score-buttons">
+                            ${[1, 2, 3, 4, 5].map(value => `
+                                <button 
+                                    class="score-btn score-btn-${value} ${score === value ? 'selected' : ''}"
+                                    onclick="updateScore(${question.id}, ${value})"
+                                    title="${scoreLabels[value]}">
+                                </button>
+                            `).join('')}
+                        </div>
                         <span class="label-max">${labelMax}</span>
-                    </div>
-                    <div class="score-buttons">
-                        ${[1, 2, 3, 4, 5].map(value => `
-                            <button 
-                                class="score-btn score-btn-${value} ${score === value ? 'selected' : ''}"
-                                onclick="updateScore(${question.id}, ${value})"
-                                title="${scoreLabels[value]}">
-                                <span class="score-btn-number">${value}</span>
-                            </button>
-                        `).join('')}
                     </div>
                     <div class="score-feedback" id="feedback-${question.id}">
                         ${score ? `<span class="feedback-text">${scoreLabels[score]}</span>` : ''}
@@ -346,7 +350,7 @@ function loadPage(pageNumber) {
             <button onclick="previousPage()" class="btn btn-secondary" ${pageNumber === 1 ? 'disabled' : ''}>
                 ← Página Anterior
             </button>
-            ${pageNumber === TOTAL_PAGES ? `<button ${lastPageButtonAction} class="btn btn-primary">${lastPageButtonText}</button>` : `<button onclick="nextPage()" class="btn btn-primary">Siguiente Página →</button>`}
+            ${pageNumber === TOTAL_PAGES ? `<button ${lastPageButtonAction} class="btn btn-primary" style="background: #e8f0fa; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#e8f0fa, #e8f0fa), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.2em;">${lastPageButtonText}</button>` : `<button onclick="nextPage()" class="btn btn-primary" style="background: #e8f0fa; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#e8f0fa, #e8f0fa), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.2em;">Siguiente Página →</button>`}
         </div>
     `;
     
@@ -502,7 +506,7 @@ async function completeAllTests() {
     // Guardar perfil en localStorage para la página de predicciones
     localStorage.setItem('riasec_profile', JSON.stringify(riasecProfile));
     
-    // Redirigir a la página de predicciones con parámetro para recalcular
+    // Redirigir a la  predicciones con parámetro para recalcular
     window.location.href = '/predicciones?recalculate=true';
 }
 

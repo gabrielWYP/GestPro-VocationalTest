@@ -102,7 +102,7 @@
 }
 
 .step-number {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    background: transparent;
     color: white;
     width: 50px;
     height: 50px;
@@ -111,7 +111,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 700;
     margin: 0 auto 1rem;
 }
 
