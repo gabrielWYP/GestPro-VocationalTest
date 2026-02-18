@@ -82,3 +82,9 @@ def predicciones():
 def upload():
     """Página de prueba para subir imágenes a OCI"""
     return render_template('upload.html')
+
+
+@page_bp.route('/riasec')
+def riasec():
+    """Página del test RIASEC"""
+    return render_template('riasec.html')
