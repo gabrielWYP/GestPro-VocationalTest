@@ -8,6 +8,7 @@ from controllers.career_controller import CareerController
 from controllers.auth_controller import AuthController
 from controllers.predictions_controller import PredictionsController
 from controllers.visits_controller import VisitsController
+from controllers.upload_controller import UploadController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -71,3 +72,9 @@ api_bp.add_url_rule('/visits/info', 'get_visitor_info',
                     VisitsController.get_visitor_info, methods=['GET'])
 api_bp.add_url_rule('/visits/statistics', 'get_visit_statistics',
                     VisitsController.get_statistics, methods=['GET'])
+
+# Upload endpoints (subida de imágenes a OCI)
+api_bp.add_url_rule('/upload/image', 'upload_image',
+                    UploadController.upload_image, methods=['POST'])
+api_bp.add_url_rule('/upload/images', 'upload_multiple_images',
+                    UploadController.upload_multiple_images, methods=['POST'])
