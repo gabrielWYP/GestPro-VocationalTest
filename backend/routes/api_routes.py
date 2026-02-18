@@ -67,6 +67,8 @@ api_bp.add_url_rule('/careers', 'get_all_careers',
                     CareerController.get_all_careers, methods=['GET'])
 api_bp.add_url_rule('/careers/<int:career_id>', 'get_career',
                     CareerController.get_career, methods=['GET'])
+api_bp.add_url_rule('/careers/clear-cache', 'clear_careers_cache',
+                    CareerController.clear_cache, methods=['POST'])
 
 # Visits endpoints (para rastrear visitantes anónimos)
 api_bp.add_url_rule('/visits/register', 'register_visit',

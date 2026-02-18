@@ -81,8 +81,10 @@ async function loadCareers() {
             const card = document.createElement('div');
             card.className = 'career-card';
             card.style.cursor = 'pointer';
+            const afinidadDisplay = career.afinidad ? `<div class="career-afinidad">${career.afinidad}%</div>` : '';
             card.innerHTML = `
-                <div class="career-icon">${career.icon || '📚'}</div>
+                <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" style="width: 100%; height: 100%; object-fit: cover;">` : '📚'}</div>
+                ${afinidadDisplay}
                 <h3>${career.name}</h3>
                 <p class="career-description">${career.description}</p>
             `;

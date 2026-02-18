@@ -9,6 +9,16 @@ class CareerService:
     """Servicio para gestionar carreras"""
     
     @staticmethod
+    def clear_cache():
+        """Limpiar todo el cache de este servicio"""
+        CareerService.get_careers_list.cache_clear()
+        CareerService.get_career_detail.cache_clear()
+        CareerService.get_all_careers.cache_clear()
+        CareerService.get_all_careers_full.cache_clear()
+        CareerService.get_career_by_id.cache_clear()
+        print("Cache del servicio de carreras limpiado")
+    
+    @staticmethod
     @lru_cache(maxsize=128)
     def get_careers_list() -> tuple:
         """
@@ -20,7 +30,7 @@ class CareerService:
             with OracleConnection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
-                        f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS ORDER BY NOMBRE_CARRERA"
+                        f"SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO ORDER BY CARRERA"
                     )
                     rows = cursor.fetchall()
                     
@@ -28,7 +38,8 @@ class CareerService:
                         'id': row[0],
                         'name': row[1],
                         'description': row[2],
-                        'icon': row[3]
+                        'afinidad': row[3],
+                        'url': row[4]
                     } for row in rows)
                     return result
         except Exception as e:
@@ -48,7 +59,7 @@ class CareerService:
                 with conn.cursor() as cursor:
                     # Obtener datos básicos de la carrera
                     cursor.execute(
-                        f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS WHERE ID = :1",
+                        f"SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO WHERE ID = :1",
                         (career_id,)
                     )
                     row = cursor.fetchone()
@@ -80,7 +91,8 @@ class CareerService:
                         'id': row[0],
                         'name': row[1],
                         'description': row[2],
-                        'icon': row[3],
+                        'afinidad': row[3],
+                        'url': row[4],
                         'skills': skills,
                         'jobs': jobs
                     }
@@ -98,7 +110,7 @@ class CareerService:
             with OracleConnection() as conn:
                 with conn.cursor() as cursor:
                     # Obtener carreras
-                    cursor.execute(f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS")
+                    cursor.execute(f"SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO")
                     rows = cursor.fetchall()
                     
                     careers = []
@@ -108,20 +120,21 @@ class CareerService:
                         # Obtener skills de esta carrera
                         cursor.execute(
                             f"""SELECT S.NOMBRE FROM {ORACLE_SCHEMA}.SKILLS S
-                               INNER JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
-                               WHERE CS.FK_CARRERA = :1
+                               LEFT JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
+                               WHERE CS.FK_CARRERA = :1 OR CS.FK_CARRERA IS NULL
                                ORDER BY S.NOMBRE""",
                             (career_id,)
                         )
                         skills_rows = cursor.fetchall()
-                        skills = [skill[0] for skill in skills_rows]
+                        skills = [skill[0] for skill in skills_rows if skill[0]]
                         
                         careers.append({
                             'id': career_id,
                             'name': row[1],
                             'description': row[2],
-                            'skills': skills,
-                            'icon': row[3]
+                            'afinidad': row[3],
+                            'url': row[4],
+                            'skills': skills
                         })
                     
                     return tuple(careers)
@@ -140,7 +153,7 @@ class CareerService:
             with OracleConnection() as conn:
                 with conn.cursor() as cursor:
                     # Obtener todas las carreras
-                    cursor.execute(f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC, CARRERA_ICONO FROM {ORACLE_SCHEMA}.CARRERAS ORDER BY NOMBRE_CARRERA")
+                    cursor.execute(f"SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO ORDER BY CARRERA")
                     rows = cursor.fetchall()
                     
                     careers = []
@@ -148,14 +161,17 @@ class CareerService:
                         career_id = row[0]
                         
                         # Obtener skills de esta carrera
-                        cursor.execute(
-                            f"""SELECT S.NOMBRE FROM {ORACLE_SCHEMA}.SKILLS S
-                               INNER JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
-                               WHERE CS.FK_CARRERA = :1
-                               ORDER BY S.NOMBRE""",
-                            (career_id,)
-                        )
-                        skills = [skill[0] for skill in cursor.fetchall()]
+                        try:
+                            cursor.execute(
+                                f"""SELECT S.NOMBRE FROM {ORACLE_SCHEMA}.SKILLS S
+                                   INNER JOIN {ORACLE_SCHEMA}.CARRERAS_SKILLS CS ON S.ID = CS.FK_SKILLS
+                                   WHERE CS.FK_CARRERA = :1
+                                   ORDER BY S.NOMBRE""",
+                                (career_id,)
+                            )
+                            skills = [skill[0] for skill in cursor.fetchall()]
+                        except:
+                            skills = []
                         
                         # Obtener tareas/jobs de esta carrera
                         cursor.execute(
@@ -171,7 +187,8 @@ class CareerService:
                             'id': career_id,
                             'name': row[1],
                             'description': row[2],
-                            'icon': row[3],
+                            'afinidad': row[3],
+                            'url': row[4],
                             'skills': skills,
                             'jobs': jobs
                         })
@@ -200,7 +217,7 @@ class CareerService:
                 with conn.cursor() as cursor:
                     # Obtener carrera
                     cursor.execute(
-                        f"SELECT ID, NOMBRE_CARRERA, CARRERA_DESC FROM {ORACLE_SCHEMA}.CARRERAS WHERE ID = :1",
+                        f"SELECT ID, CARRERA, DESCRIPCION FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO WHERE ID = :1",
                         (career_id,)
                     )
                     row = cursor.fetchone()
