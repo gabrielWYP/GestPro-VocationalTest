@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -113,8 +114,12 @@
         </div>
     </footer>
 
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+
     <!-- Scripts externos -->
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/visits.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>

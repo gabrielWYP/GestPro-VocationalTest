@@ -1,0 +1,249 @@
+/* ===== NPS Modal Styles ===== */
+
+.nps-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: nps-fadeIn 0.3s ease;
+}
+
+@keyframes nps-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes nps-slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.nps-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    max-width: 580px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: nps-slideUp 0.4s ease;
+}
+
+.nps-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.nps-close:hover {
+    color: #475569;
+}
+
+/* Header */
+.nps-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.nps-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.nps-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.3rem;
+    line-height: 1.4;
+}
+
+.nps-subtitle {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Scale */
+.nps-scale {
+    margin-bottom: 1.5rem;
+}
+
+.nps-numbers {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.nps-number {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nps-number:hover {
+    border-color: var(--primary-color, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+    transform: translateY(-2px);
+}
+
+.nps-number.selected {
+    background: var(--primary-color, #6366f1);
+    border-color: var(--primary-color, #6366f1);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Color coding for NPS scale */
+.nps-number[data-value="0"],
+.nps-number[data-value="1"],
+.nps-number[data-value="2"],
+.nps-number[data-value="3"],
+.nps-number[data-value="4"],
+.nps-number[data-value="5"],
+.nps-number[data-value="6"] {
+    --nps-color: #ef4444;
+}
+
+.nps-number[data-value="7"],
+.nps-number[data-value="8"] {
+    --nps-color: #f59e0b;
+}
+
+.nps-number[data-value="9"],
+.nps-number[data-value="10"] {
+    --nps-color: #10b981;
+}
+
+.nps-number:hover {
+    border-color: var(--nps-color);
+    background: color-mix(in srgb, var(--nps-color) 8%, white);
+}
+
+.nps-number.selected {
+    background: var(--nps-color);
+    border-color: var(--nps-color);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--nps-color) 40%, transparent);
+}
+
+/* Labels */
+.nps-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.nps-labels span {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Submit button */
+.nps-submit-btn {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary-color, #6366f1);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.nps-submit-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.nps-submit-btn:not(:disabled):hover {
+    background: var(--secondary-color, #8b5cf6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Thanks message */
+.nps-thanks {
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+.nps-thanks h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0.5rem 0;
+}
+
+.nps-thanks p {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* Progress */
+.nps-progress {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.nps-progress span {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .nps-modal {
+        padding: 1.5rem;
+        width: 95%;
+    }
+
+    .nps-number {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+
+    .nps-numbers {
+        gap: 4px;
+    }
+
+    .nps-header h3 {
+        font-size: 1rem;
+    }
+}
