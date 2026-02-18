@@ -72,3 +72,26 @@ class PredictionsController:
                 'success': False,
                 'message': 'Error inesperado'
             }), 500
+
+    @staticmethod
+    def get_occupations():
+        """
+        Endpoint GET /api/occupations
+        Retorna todas las ocupaciones con sus posibles carreras
+        desde MODELO_CONVERSIONES
+        """
+        try:
+            occupations = PredictionsService.get_all_occupations()
+            
+            return jsonify({
+                'success': True,
+                'total': len(occupations),
+                'occupations': occupations
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Error en get_occupations: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error obteniendo ocupaciones'
+            }), 500

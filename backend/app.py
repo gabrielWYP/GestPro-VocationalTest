@@ -26,6 +26,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+#Ci/cd
+
 # Determinar modo de ejecución
 APP_MODE = os.getenv('APP_MODE', 'PRODUCTION').upper()
 IS_DEVELOPMENT = APP_MODE == 'DEVELOPMENT'

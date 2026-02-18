@@ -1,0 +1,60 @@
+<!-- NPS Modal - Se incluye en todas las páginas -->
+<div id="nps-overlay" class="nps-overlay" style="display: none;">
+    <div class="nps-modal">
+        <button class="nps-close" onclick="NPS.closeModal()">&times;</button>
+        
+        <!-- Encuesta de Página -->
+        <div id="nps-pagina" class="nps-survey" style="display: none;">
+            <div class="nps-header">
+                <div class="nps-icon">🌐</div>
+                <h3>¿Qué tan probable es que recomiendes nuestra página web a un amigo o compañero?</h3>
+                <p class="nps-subtitle">Selecciona un puntaje del 0 al 10</p>
+            </div>
+            <div class="nps-scale">
+                <div class="nps-numbers" id="nps-numbers-pagina">
+                    <!-- Se generan dinámicamente -->
+                </div>
+                <div class="nps-labels">
+                    <span>Nada probable</span>
+                    <span>Muy probable</span>
+                </div>
+            </div>
+            <button class="nps-submit-btn" id="nps-submit-pagina" disabled onclick="NPS.submitResponse('pagina')">
+                Enviar
+            </button>
+        </div>
+
+        <!-- Encuesta de Test -->
+        <div id="nps-test" class="nps-survey" style="display: none;">
+            <div class="nps-header">
+                <div class="nps-icon">📝</div>
+                <h3>¿Qué tan satisfecho estás con el test vocacional que realizaste?</h3>
+                <p class="nps-subtitle">Selecciona un puntaje del 0 al 10</p>
+            </div>
+            <div class="nps-scale">
+                <div class="nps-numbers" id="nps-numbers-test">
+                    <!-- Se generan dinámicamente -->
+                </div>
+                <div class="nps-labels">
+                    <span>Nada satisfecho</span>
+                    <span>Muy satisfecho</span>
+                </div>
+            </div>
+            <button class="nps-submit-btn" id="nps-submit-test" disabled onclick="NPS.submitResponse('test')">
+                Enviar
+            </button>
+        </div>
+
+        <!-- Mensaje de agradecimiento -->
+        <div id="nps-thanks" class="nps-thanks" style="display: none;">
+            <div class="nps-icon">🎉</div>
+            <h3>¡Gracias por tu opinión!</h3>
+            <p>Tu respuesta nos ayuda a mejorar la experiencia.</p>
+        </div>
+
+        <!-- Indicador de progreso -->
+        <div class="nps-progress" id="nps-progress">
+            <span id="nps-progress-text"></span>
+        </div>
+    </div>
+</div>
