@@ -2,12 +2,22 @@
 Lógica de negocio para carreras
 """
 from functools import lru_cache
+from urllib.parse import quote
 from db.db_config import OracleConnection
 from config import ORACLE_SCHEMA
 
 class CareerService:
     """Servicio para gestionar carreras"""
     
+    @staticmethod
+    def _build_image_url(image_path: str) -> str:
+        """
+        Construye URL del proxy para servir imágenes
+        El proxy maneja URL encoding automáticamente
+        Ej: 'ikigais_images/Administración de Empresas.svg' → '/api/image/proxy?path=ikigais_images/Administración%20de%20Empresas.svg'
+        """
+        encoded_path = quote(image_path, safe='/')
+        return f"/api/image/proxy?path={encoded_path}"
     @staticmethod
     def clear_cache():
         """Limpiar todo el cache de este servicio"""
@@ -39,7 +49,7 @@ class CareerService:
                         'name': row[1],
                         'description': row[2],
                         'afinidad': row[3],
-                        'url': row[4]
+                        'url': CareerService._build_image_url(row[4])
                     } for row in rows)
                     return result
         except Exception as e:
@@ -92,7 +102,7 @@ class CareerService:
                         'name': row[1],
                         'description': row[2],
                         'afinidad': row[3],
-                        'url': row[4],
+                        'url': CareerService._build_image_url(row[4]),
                         'skills': skills,
                         'jobs': jobs
                     }
@@ -133,7 +143,7 @@ class CareerService:
                             'name': row[1],
                             'description': row[2],
                             'afinidad': row[3],
-                            'url': row[4],
+                            'url': CareerService._build_image_url(row[4]),
                             'skills': skills
                         })
                     
@@ -188,10 +198,15 @@ class CareerService:
                             'name': row[1],
                             'description': row[2],
                             'afinidad': row[3],
-                            'url': row[4],
+                            'url': CareerService._build_image_url(row[4]),
                             'skills': skills,
                             'jobs': jobs
                         })
+                    
+                    # Log del payload para debug
+                    print(f"\n✓ Carreras completas cargadas desde BD ({len(careers)} carreras):")
+                    for career in careers:
+                        print(f"  - ID: {career['id']}, Nombre: {career['name']}, URL: {career['url']}, Skills: {len(career['skills'])}, Jobs: {len(career['jobs'])}")
                     
                     return tuple(careers)
         except Exception as e:

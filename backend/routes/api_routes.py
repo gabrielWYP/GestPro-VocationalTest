@@ -1,7 +1,11 @@
 """
 Rutas de API (JSON endpoints)
 """
-from flask import Blueprint
+from flask import Blueprint, send_file, request, jsonify
+from io import BytesIO
+import requests
+from urllib.parse import quote
+from config import OCI_PREAUTH_URL_READ
 from controllers.test_controller import TestController
 from controllers.advisory_controller import AdvisoryController
 from controllers.career_controller import CareerController
@@ -93,3 +97,49 @@ api_bp.add_url_rule('/nps/submit', 'nps_submit',
                     NpsController.submit_response, methods=['POST'])
 api_bp.add_url_rule('/nps/status', 'nps_status',
                     NpsController.get_status, methods=['GET'])
+
+
+# Image proxy endpoint (sirve imágenes desde OCI sin problemas CORS)
+@api_bp.route('/image/proxy', methods=['GET'])
+def proxy_image():
+    """
+    Proxy para servir imágenes desde OCI Object Storage
+    Soluciona problemas de CORS descargando en backend y reenviando
+    
+    Parámetro: path = ruta relativa (ej: 'ikigais_images/Administración de Empresas.svg')
+    Uso: GET /api/image/proxy?path=ikigais_images/logo.svg
+    """
+    try:
+        # Obtener ruta desde parámetro
+        image_path = request.args.get('path', '')
+        
+        if not image_path:
+            return jsonify({'error': 'Falta parámetro "path"'}), 400
+        
+        # Construir URL en OCI con encoding
+        encoded_path = quote(image_path, safe='/')
+        oci_url = OCI_PREAUTH_URL_READ + encoded_path
+        
+        # Descargar imagen desde OCI
+        response = requests.get(oci_url, timeout=10)
+        
+        if response.status_code != 200:
+            return jsonify({'error': f'Error descargando imagen: {response.status_code}'}), 404
+        
+        # Determinar tipo MIME basado en extensión
+        content_type = 'image/svg+xml' if image_path.lower().endswith('.svg') else 'image/png'
+        if image_path.lower().endswith('.jpg') or image_path.lower().endswith('.jpeg'):
+            content_type = 'image/jpeg'
+        elif image_path.lower().endswith('.gif'):
+            content_type = 'image/gif'
+        
+        # Devolver imagen con headers CORS
+        return send_file(
+            BytesIO(response.content),
+            mimetype=content_type,
+            as_attachment=False
+        )
+    
+    except Exception as e:
+        print(f"Error en proxy de imagen: {e}")
+        return jsonify({'error': str(e)}), 500

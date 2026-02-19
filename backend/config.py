@@ -22,6 +22,8 @@ ORACLE_CONNECTION_STRING = os.environ.get('ORACLE_CONNECTION_STRING', '')
 # Oracle Cloud Infrastructure (OCI) Object Storage
 OCI_PREAUTH_URL = os.environ.get('OCI_PREAUTH_URL', '')
 
+OCI_PREAUTH_URL_READ = os.environ.get('OCI_PREAUTH_URL_READ', '')
+
 # Carrera default schema en Oracle
 ORACLE_SCHEMA = 'ALEJO'
 
