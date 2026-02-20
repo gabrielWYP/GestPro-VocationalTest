@@ -12,11 +12,18 @@ class CareerService:
     @staticmethod
     def _build_image_url(image_path: str) -> str:
         """
-        Construye URL del proxy para servir imágenes
-        El proxy maneja URL encoding automáticamente
-        Ej: 'ikigais_images/Administración de Empresas.svg' → '/api/image/proxy?path=ikigais_images/Administración%20de%20Empresas.svg'
+        Construye URL del proxy para servir imágenes.
+        Normaliza rutas antiguas con prefijo 'ikigais_images/' para
+        apuntar al objeto real en raíz del bucket.
         """
-        encoded_path = quote(image_path, safe='/')
+        if not image_path:
+            return ""
+
+        normalized_path = image_path.strip()
+        if normalized_path.startswith('ikigais_images/'):
+            normalized_path = normalized_path.split('/', 1)[1]
+
+        encoded_path = quote(normalized_path, safe='/')
         return f"/api/image/proxy?path={encoded_path}"
     @staticmethod
     def clear_cache():
