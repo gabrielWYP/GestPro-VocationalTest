@@ -87,12 +87,18 @@ api_bp.add_url_rule('/occupations', 'get_occupations',
                     PredictionsController.get_occupations, methods=['GET'])
 
 # Advisory endpoints
+api_bp.add_url_rule('/advisors', 'get_advisors',
+                    AdvisoryController.get_advisors, methods=['GET'])
 api_bp.add_url_rule('/advisory-submit', 'book_advisory',
                     AdvisoryController.book_advisory, methods=['POST'])
 api_bp.add_url_rule('/available-times', 'get_available_times',
                     AdvisoryController.get_available_times, methods=['GET'])
 api_bp.add_url_rule('/booked-slots', 'get_booked_slots',
                     AdvisoryController.get_booked_slots, methods=['GET'])
+api_bp.add_url_rule('/advisory/my-bookings', 'get_my_bookings',
+                    AdvisoryController.get_my_bookings, methods=['GET'])
+api_bp.add_url_rule('/advisory/<int:booking_id>', 'cancel_booking',
+                    AdvisoryController.cancel_booking, methods=['DELETE'])
 
 # Career endpoints
 api_bp.add_url_rule('/careers/list', 'get_careers_list',
