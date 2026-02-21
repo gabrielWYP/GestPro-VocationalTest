@@ -48,9 +48,7 @@ def test_intro():
 @page_bp.route('/test/responder')
 def test_responder():
     """Página del test vocacional (requiere estar logueado)"""
-    questions = TestService.get_questions()
-    total = len(questions)
-    return render_template('test.html', questions=questions, total=total)
+    return render_template('test.html')
 
 
 @page_bp.route('/test')
