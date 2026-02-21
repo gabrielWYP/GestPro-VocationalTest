@@ -373,6 +373,21 @@
     margin-bottom: 0.5rem;
 }
 
+.page-header.careers-header {
+    background: transparent;
+    color: var(--text-color);
+    padding-bottom: 0.35rem;
+}
+
+.page-header.careers-header p {
+    color: #475569;
+    margin-bottom: 0;
+}
+
+.page-header.careers-header + .careers-section {
+    padding-top: 0.2rem;
+}
+
 /* CTA Section */
 .cta-section {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -384,6 +399,11 @@
 .cta-section h2 {
     font-size: 2rem;
     margin-bottom: 2rem;
+}
+
+.cta-section.careers-cta {
+    background: transparent;
+    color: var(--text-color);
 }
 
 /* Careers Section */

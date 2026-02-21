@@ -109,17 +109,17 @@
 }
 
 .nps-number:hover {
-    border-color: var(--primary-color, #6366f1);
-    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--primary-color, #5b7ef7);
+    background: rgba(91, 126, 247, 0.05);
     transform: translateY(-2px);
 }
 
 .nps-number.selected {
-    background: var(--primary-color, #6366f1);
-    border-color: var(--primary-color, #6366f1);
+    background: var(--primary-color, #5b7ef7);
+    border-color: var(--primary-color, #5b7ef7);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(91, 126, 247, 0.3);
 }
 
 /* Color coding for NPS scale */
@@ -174,7 +174,7 @@
     padding: 0.8rem;
     border: none;
     border-radius: 10px;
-    background: var(--primary-color, #6366f1);
+    background: var(--primary-color, #5b7ef7);
     color: #fff;
     font-family: 'Poppins', sans-serif;
     font-size: 1rem;
@@ -190,9 +190,9 @@
 }
 
 .nps-submit-btn:not(:disabled):hover {
-    background: var(--secondary-color, #8b5cf6);
+    background: var(--secondary-color, #8bbbee);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(91, 126, 247, 0.3);
 }
 
 /* Thanks message */

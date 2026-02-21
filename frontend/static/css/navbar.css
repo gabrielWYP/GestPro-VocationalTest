@@ -93,7 +93,7 @@
 }
 
 .btn-logout {
-    background: var(--secondary-color, #6366f1);
+    background: var(--secondary-color, #5b7ef7);
     color: white !important;
     padding: 0.6rem 1.5rem;
     border-radius: 50px;
