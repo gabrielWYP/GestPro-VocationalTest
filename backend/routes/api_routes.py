@@ -25,31 +25,33 @@ IMAGE_PROXY_CACHE_MAX_ITEMS = 256
 image_proxy_cache = OrderedDict()
 
 
-def _load_image_name_map():
-    """Cargar mapa nombre_normalizado -> nombre_real desde archivo generado de URLs."""
+def _load_image_maps():
+    """Cargar mapas de nombres y URLs desde archivo generado de URLs."""
     current_file = Path(__file__).resolve()
     project_root = current_file.parents[2]
     map_path = project_root / 'frontend' / 'static' / 'images' / 'oci_read_urls.txt'
 
     if not map_path.exists():
-        return {}
+        return {}, {}
 
     name_map = {}
+    url_map = {}
     try:
         for line in map_path.read_text(encoding='utf-8').splitlines():
             if '\t' not in line:
                 continue
-            file_name, _ = line.split('\t', 1)
+            file_name, file_url = line.split('\t', 1)
             normalized = file_name.casefold().strip()
             if normalized:
                 name_map[normalized] = file_name
+                url_map[file_name] = file_url.strip()
     except Exception:
-        return {}
+        return {}, {}
 
-    return name_map
+    return name_map, url_map
 
 
-image_name_map = _load_image_name_map()
+image_name_map, image_url_map = _load_image_maps()
 
 
 # Auth endpoints
@@ -188,14 +190,29 @@ def proxy_image():
         final_path = None
 
         for candidate in candidate_paths:
-            encoded_path = quote(candidate, safe='/')
-            oci_url = OCI_PREAUTH_URL_READ + encoded_path
-            current_response = requests.get(oci_url, timeout=10)
-            if current_response.status_code == 200:
-                image_bytes = current_response.content
-                response_type = current_response.headers.get('Content-Type', '')
-                content_type = response_type.split(';')[0] if response_type else None
-                final_path = candidate
+            candidate_urls = []
+            mapped_url = image_url_map.get(candidate)
+            if mapped_url:
+                candidate_urls.append(mapped_url)
+
+            if OCI_PREAUTH_URL_READ:
+                encoded_path = quote(candidate, safe='/')
+                candidate_urls.append(OCI_PREAUTH_URL_READ + encoded_path)
+
+            for oci_url in candidate_urls:
+                try:
+                    current_response = requests.get(oci_url, timeout=10)
+                except requests.exceptions.RequestException:
+                    continue
+
+                if current_response.status_code == 200:
+                    image_bytes = current_response.content
+                    response_type = current_response.headers.get('Content-Type', '')
+                    content_type = response_type.split(';')[0] if response_type else None
+                    final_path = candidate
+                    break
+
+            if image_bytes is not None:
                 break
 
         if image_bytes is None:
