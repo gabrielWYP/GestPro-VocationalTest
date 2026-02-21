@@ -255,3 +255,5 @@ def proxy_image():
     except Exception as e:
         print(f"Error en proxy de imagen: {e}")
         return jsonify({'error': str(e)}), 500
+
+#ci/cd

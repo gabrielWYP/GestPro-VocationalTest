@@ -82,6 +82,7 @@ jobs:
           CHAT_RATE_LIMIT=${{ secrets.CHAT_RATE_LIMIT }}
           CHAT_MAX_RESPONSE_TOKENS=${{ secrets.CHAT_MAX_RESPONSE_TOKENS }}
           CHAT_MAX_MESSAGE_LENGTH=${{ secrets.CHAT_MAX_MESSAGE_LENGTH }}
+          OCI_PREAUTH_URL_READ=${{ secrets.OCI_PREAUTH_URL_READ }}
           EOF
           
           # PASO 1: Detener solo vocational-test-app (Nginx sigue corriendo)
