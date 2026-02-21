@@ -5,30 +5,39 @@
 const CAREERS_CACHE_KEY = 'careers_full_cache';
 const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 
-/**
- * Obtener datos del cache si existen y no han expirado
- * @returns {Object|null} Datos cacheados o null
- */
-function getCachedCareers() {
+function getCacheEntry() {
     const cached = localStorage.getItem(CAREERS_CACHE_KEY);
     if (!cached) return null;
 
     try {
-        const { data, timestamp } = JSON.parse(cached);
-        const now = Date.now();
-
-        if (now - timestamp < CAREERS_CACHE_EXPIRY) {
-            console.log('Usando carreras en caché');
-            return data;
-        } else {
+        const parsed = JSON.parse(cached);
+        if (!parsed || !parsed.data || !parsed.timestamp) {
             localStorage.removeItem(CAREERS_CACHE_KEY);
             return null;
         }
+        return parsed;
     } catch (error) {
         console.error('Error leyendo cache de carreras:', error);
         localStorage.removeItem(CAREERS_CACHE_KEY);
         return null;
     }
+}
+
+/**
+ * Obtener datos del cache si existen y no han expirado
+ * @returns {Object|null} Datos cacheados o null
+ */
+function getCachedCareers() {
+    const entry = getCacheEntry();
+    if (!entry) return null;
+
+    const now = Date.now();
+    if (now - entry.timestamp < CAREERS_CACHE_EXPIRY) {
+        console.log('Usando carreras en caché');
+        return entry.data;
+    }
+
+    return null;
 }
 
 /**
@@ -68,44 +77,72 @@ async function loadAllCareersToCache() {
     throw new Error(data.message || 'Error al cargar carreras');
 }
 
+async function refreshCareersInBackground(grid) {
+    try {
+        const response = await fetch('/api/careers/all');
+        const data = await response.json();
+
+        if (data.success) {
+            setCachedCareers(data);
+            renderCareers(grid, data.careers || []);
+        }
+    } catch (error) {
+        console.warn('No se pudo refrescar carreras en background:', error);
+    }
+}
+
+function renderCareers(grid, careers) {
+    grid.innerHTML = '';
+
+    for (const career of careers) {
+        const card = document.createElement('div');
+        card.className = 'career-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" style="width: 100%; height: 100%; object-fit: cover;">` : '📚'}</div>
+            <h3>${career.name}</h3>
+        `;
+
+        card.onclick = () => {
+            window.location.href = `/career-detail?id=${career.id}`;
+        };
+
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+
+        grid.appendChild(card);
+    }
+
+    if (careers.length === 0) {
+        grid.innerHTML = '<p class="no-data">No hay carreras disponibles.</p>';
+    }
+}
+
 async function loadCareers() {
     const grid = document.getElementById('careers-grid');
+    const entry = getCacheEntry();
+
+    // Render instantáneo si existe cache (aunque esté expirado)
+    if (entry?.data?.careers?.length) {
+        renderCareers(grid, entry.data.careers);
+
+        const isExpired = (Date.now() - entry.timestamp) >= CAREERS_CACHE_EXPIRY;
+        if (isExpired) {
+            refreshCareersInBackground(grid);
+        }
+        return;
+    }
+
     grid.innerHTML = '<p class="loading">Cargando carreras...</p>';
 
     try {
         const data = await loadAllCareersToCache();
-        
-        grid.innerHTML = '';
-
-        for (const career of data.careers) {
-            const card = document.createElement('div');
-            card.className = 'career-card';
-            card.style.cursor = 'pointer';
-            card.innerHTML = `
-                <div class="career-icon">${career.icon || '📚'}</div>
-                <h3>${career.name}</h3>
-                <p class="career-description">${career.description}</p>
-            `;
-            
-            // Al hacer clic, ir al detalle (usará el cache)
-            card.onclick = () => {
-                window.location.href = `/career-detail?id=${career.id}`;
-            };
-
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-8px)';
-            });
-
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-
-            grid.appendChild(card);
-        }
-
-        if (data.careers.length === 0) {
-            grid.innerHTML = '<p class="no-data">No hay carreras disponibles.</p>';
-        }
+        renderCareers(grid, data.careers || []);
 
     } catch (error) {
         console.error('Error cargando carreras:', error);

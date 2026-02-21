@@ -27,6 +27,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -59,13 +60,20 @@
                     <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">Agendar tu Asesoría</h3>
                     <form id="advisoryForm" class="advisory-form">
                         <div class="form-group">
-                            <label for="name">Nombre Completo *</label>
-                            <input type="text" id="name" name="name" required placeholder="Juan Pérez">
+                            <label for="name">Nombre Completo</label>
+                            <input type="text" id="name" name="name" placeholder="Inicia sesión para completar" readonly>
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Inicia sesión para completar" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="advisor">Asesor *</label>
+                            <select id="advisor" name="advisor" required>
+                                <option value="">Cargando asesores...</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -74,22 +82,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="time">Hora Preferida *</label>
-                            <select id="time" name="time" required>
-                                <option value="">Selecciona una hora</option>
-                                <option value="09:00">09:00 AM</option>
-                                <option value="10:00">10:00 AM</option>
-                                <option value="11:00">11:00 AM</option>
-                                <option value="14:00">02:00 PM</option>
-                                <option value="15:00">03:00 PM</option>
-                                <option value="16:00">04:00 PM</option>
-                                <option value="17:00">05:00 PM</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="message">Mensaje (Opcional)</label>
-                            <textarea id="message" name="message" placeholder="Cuéntanos qué te gustaría aclarar en la asesoría..." style="padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 8px; font-family: 'Poppins', sans-serif; resize: vertical; min-height: 100px;" onload="this.style.borderColor='var(--border-color)'" onfocus="this.style.borderColor='var(--primary-color)'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)'" onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none'"></textarea>
+                            <label>Hora Preferida *</label>
+                            <input type="hidden" id="time" name="time" required>
+                            <div id="timeSlots" class="time-slots-grid">
+                                <p class="time-slots-placeholder">Primero selecciona un asesor y una fecha</p>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Agendar Asesoría</button>
@@ -98,8 +95,17 @@
                     <div id="successMessage" style="display: none;" class="success-message">
                         <h3>¡Asesoría Agendada Exitosamente! ✓</h3>
                         <p id="successText"></p>
+                        <button onclick="resetForm()" class="btn btn-secondary" style="margin-right: 0.5rem;">Agendar otra</button>
                         <a href="/" class="btn btn-secondary">Volver al Inicio</a>
                     </div>
+                </div>
+            </div>
+
+            <!-- Mis asesorías -->
+            <div id="myBookingsSection" class="my-bookings-section" style="display: none;">
+                <h3>Mis Asesorías Agendadas</h3>
+                <div id="myBookingsList" class="bookings-list">
+                    <p class="no-bookings">Cargando...</p>
                 </div>
             </div>
 
@@ -115,12 +121,6 @@
             <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
         </div>
     </footer>
-
-    <!-- Datos de slots reservados embebidos para acceso desde JavaScript -->
-    <script type="application/json" id="bookedSlots">{{ booked_slots | safe }}</script>
-
-    <!-- NPS Modal -->
-    {% include 'nps-modal.html' %}
 
     <!-- Scripts externos -->
     <script src="{{ url_for('static', filename='js/advisory.js') }}"></script>

@@ -367,6 +367,9 @@ function displayCareersForOccupation(occupation) {
         }
     });
     
+    // Array de colores para las carreras (rotativo)
+    const colors = ['lila', 'celeste', 'menta', 'durazno', 'rosado'];
+    
     let careersHtml = '';
     
     // Mostrar carreras peruanas si existen
@@ -374,21 +377,27 @@ function displayCareersForOccupation(occupation) {
     if (carrerasPeru.length > 0) {
         carrerasPeru.forEach((carrera, index) => {
             const relevancia = carrera.relevancia || 0;
-            const relevanciaColor = relevancia >= 80 ? '#10b981' : relevancia >= 50 ? '#f59e0b' : '#6b7280';
+            const colorClass = colors[index % colors.length];
             careersHtml += `
-                <div class="career-card" style="animation-delay: ${index * 0.1}s;">
-                    <h4>${carrera.nombre}</h4>
-                    <span style="font-size: 0.8em; color: ${relevanciaColor}; font-weight: 600;">Afinidad: ${relevancia}%</span>
-                </div>
+                <article class="occupation-card ${colorClass}">
+                    <div class="content">
+                        <h3 class="occupation-name">${carrera.nombre}</h3>
+                    </div>
+                </article>
             `;
         });
     } else if (occupation.carreras && occupation.carreras.length > 0) {
         // Fallback a carreras USA si no hay peruanas
         occupation.carreras.forEach((carrera, index) => {
+            const colorClass = colors[index % colors.length];
+            // Para fallback, asumimos compatibilidad media (60%)
+            const compatibility = 60;
             careersHtml += `
-                <div class="career-card" style="animation-delay: ${index * 0.1}s; background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); padding: 6px 16px; display: flex; align-items: center; justify-content: center;">
-                    <h4 style="margin: 0; font-size: 1em; font-weight: 600; color: #333333; line-height: 1.3; word-wrap: break-word; overflow-wrap: break-word;">${carrera}</h4>
-                </div>
+                <article class="occupation-card ${colorClass}">
+                    <div class="content">
+                        <h3 class="occupation-name">${carrera}</h3>
+                    </div>
+                </article>
             `;
         });
     } else {
