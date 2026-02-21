@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+    background: linear-gradient(135deg, #f0f4ff 0%, #f0f9ff 100%);
 }
 
 .auth-container {

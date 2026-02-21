@@ -2,20 +2,64 @@
 Lógica de negocio para carreras
 """
 from functools import lru_cache
+from pathlib import Path
+import unicodedata
 from urllib.parse import quote
 from db.db_config import OracleConnection
 from config import ORACLE_SCHEMA
 
 class CareerService:
     """Servicio para gestionar carreras"""
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _local_images_index() -> dict:
+        """Indexa imágenes locales por nombre normalizado."""
+        images_dir = Path(__file__).resolve().parents[2] / 'frontend' / 'static' / 'images'
+        if not images_dir.exists():
+            return {}
+
+        index = {}
+        for image_path in images_dir.glob('*.svg'):
+            normalized_name = CareerService._normalize_text(image_path.stem)
+            if normalized_name:
+                index[normalized_name] = image_path.name
+
+        return index
+
+    @staticmethod
+    def _normalize_text(text: str) -> str:
+        """Normaliza texto para comparación flexible (acentos, mayúsculas, espacios)."""
+        if not text:
+            return ''
+
+        text = unicodedata.normalize('NFKD', text)
+        text = ''.join(ch for ch in text if not unicodedata.combining(ch))
+        return ' '.join(text.casefold().strip().split())
+
+    @staticmethod
+    def _build_local_image_url(career_name: str) -> str:
+        """Construye URL local de imagen basada en el nombre de la carrera."""
+        normalized_career_name = CareerService._normalize_text(career_name)
+        if not normalized_career_name:
+            return ''
+
+        image_filename = CareerService._local_images_index().get(normalized_career_name)
+        if not image_filename:
+            return ''
+
+        return f"/static/images/{quote(image_filename)}"
     
     @staticmethod
-    def _build_image_url(image_path: str) -> str:
+    def _build_image_url(career_name: str, image_path: str) -> str:
         """
-        Construye URL del proxy para servir imágenes.
-        Normaliza rutas antiguas con prefijo 'ikigais_images/' para
-        apuntar al objeto real en raíz del bucket.
+        Prioriza imágenes locales asociadas al nombre de carrera.
+        Si no existe imagen local, usa proxy remoto como fallback.
         """
+        local_url = CareerService._build_local_image_url(career_name)
+        if local_url:
+            return local_url
+
         if not image_path:
             return ""
 
@@ -28,6 +72,7 @@ class CareerService:
     @staticmethod
     def clear_cache():
         """Limpiar todo el cache de este servicio"""
+        CareerService._local_images_index.cache_clear()
         CareerService.get_careers_list.cache_clear()
         CareerService.get_career_detail.cache_clear()
         CareerService.get_all_careers.cache_clear()
@@ -56,7 +101,7 @@ class CareerService:
                         'name': row[1],
                         'description': row[2],
                         'afinidad': row[3],
-                        'url': CareerService._build_image_url(row[4])
+                        'url': CareerService._build_image_url(row[1], row[4])
                     } for row in rows)
                     return result
         except Exception as e:
@@ -109,7 +154,7 @@ class CareerService:
                         'name': row[1],
                         'description': row[2],
                         'afinidad': row[3],
-                        'url': CareerService._build_image_url(row[4]),
+                        'url': CareerService._build_image_url(row[1], row[4]),
                         'skills': skills,
                         'jobs': jobs
                     }
@@ -150,7 +195,7 @@ class CareerService:
                             'name': row[1],
                             'description': row[2],
                             'afinidad': row[3],
-                            'url': CareerService._build_image_url(row[4]),
+                            'url': CareerService._build_image_url(row[1], row[4]),
                             'skills': skills
                         })
                     
@@ -205,7 +250,7 @@ class CareerService:
                             'name': row[1],
                             'description': row[2],
                             'afinidad': row[3],
-                            'url': CareerService._build_image_url(row[4]),
+                            'url': CareerService._build_image_url(row[1], row[4]),
                             'skills': skills,
                             'jobs': jobs
                         })

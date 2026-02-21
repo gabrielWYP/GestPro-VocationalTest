@@ -2,7 +2,7 @@
 // Endpoint: GET /api/careers/all - datos completos (id, nombre, icono, descripción, skills, jobs)
 // Con localStorage para cachear durante 1 día
 
-const CAREERS_CACHE_KEY = 'careers_full_cache';
+const CAREERS_CACHE_KEY = 'careers_full_cache_v2';
 const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
 
 function getCacheEntry() {
@@ -99,7 +99,7 @@ function renderCareers(grid, careers) {
         card.className = 'career-card';
         card.style.cursor = 'pointer';
         card.innerHTML = `
-            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" style="width: 100%; height: 100%; object-fit: cover;">` : '📚'}</div>
+            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image">` : '📚'}</div>
             <h3>${career.name}</h3>
         `;
 
