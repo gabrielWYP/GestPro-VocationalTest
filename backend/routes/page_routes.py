@@ -5,8 +5,6 @@ Rendering de templates con Jinja2
 from flask import Blueprint, render_template
 from services.test_service import TestService
 from services.career_service import CareerService
-from services.advisory_service import AdvisoryService
-import json
 
 page_bp = Blueprint('pages', __name__)
 
@@ -64,15 +62,22 @@ def test():
 @page_bp.route('/advisory')
 def advisory():
     """Página de asesorías"""
-    try:
-        booked_slots = AdvisoryService.get_booked_slots()
-    except Exception:
-        booked_slots = []
-    
-    return render_template('advisory.html', booked_slots=json.dumps(booked_slots))
+    return render_template('advisory.html')
 
 
 @page_bp.route('/predicciones')
 def predicciones():
     """Página de predicción de carreras (requiere respuestas completadas)"""
     return render_template('predicciones.html')
+
+
+@page_bp.route('/upload')
+def upload():
+    """Página de prueba para subir imágenes a OCI"""
+    return render_template('upload.html')
+
+
+@page_bp.route('/riasec')
+def riasec():
+    """Página del test RIASEC"""
+    return render_template('riasec.html')
