@@ -122,4 +122,22 @@ class CareerController:
             return jsonify({
                 'success': False,
                 'message': 'Error obteniendo carrera'
+            }), 500    
+    @staticmethod
+    def clear_cache():
+        """
+        Endpoint POST /api/careers/clear-cache
+        Limpia el cache del servidor para recargar datos de la BD
+        """
+        try:
+            CareerService.clear_cache()
+            return jsonify({
+                'success': True,
+                'message': 'Cache limpiado exitosamente'
+            })
+        except Exception as e:
+            logger.error(f"Error limpiando cache: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Error limpiando cache'
             }), 500

@@ -5,7 +5,6 @@ Procesa requests, valida datos y llama servicios
 import logging
 from flask import request, jsonify, session
 from services.test_service import TestService
-from services.career_data import CAREERS
 from utils.validators import validate_email, validate_name
 from utils.errors import ValidationError, DatabaseError
 

@@ -69,3 +69,15 @@ def advisory():
 def predicciones():
     """Página de predicción de carreras (requiere respuestas completadas)"""
     return render_template('predicciones.html')
+
+
+@page_bp.route('/upload')
+def upload():
+    """Página de prueba para subir imágenes a OCI"""
+    return render_template('upload.html')
+
+
+@page_bp.route('/riasec')
+def riasec():
+    """Página del test RIASEC"""
+    return render_template('riasec.html')

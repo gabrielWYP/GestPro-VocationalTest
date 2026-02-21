@@ -36,8 +36,9 @@
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1.2rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .nav-menu li {
@@ -50,6 +51,7 @@
     text-decoration: none;
     transition: opacity 0.3s;
     font-weight: 500;
+    font-size: 0.95rem;
 }
 
 .nav-menu a:hover {

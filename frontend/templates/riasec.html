@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test RIASEC - Test de Orientación Vocacional</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Modular -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .riasec-container {
+            max-width: 800px;
+            margin: 40px auto;
+            margin-top: 100px;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .riasec-container h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .riasec-container .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .riasec-box {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .riasec-box:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .riasec-box i {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .riasec-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .riasec-box p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .riasec-description {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .riasec-description h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .riasec-types {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .riasec-carousel {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .carousel-container {
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-nav:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-nav.prev {
+            left: 10px;
+        }
+
+        .carousel-nav.next {
+            right: 10px;
+        }
+
+        .carousel-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+
+        .carousel-dot.active {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.3);
+        }
+
+        .riasec-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .riasec-type.realistic {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .riasec-type.investigative {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .riasec-type.artistic {
+            background: linear-gradient(135deg, #f368e0 0%, #ff6b9d 100%);
+        }
+
+        .riasec-type.social {
+            background: linear-gradient(135deg, #fa8231 0%, #f79f1f 100%);
+        }
+
+        .riasec-type.enterprising {
+            background: linear-gradient(135deg, #5f27cd 0%, #ee5a6f 100%);
+        }
+
+        .riasec-type.conventional {
+            background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .riasec-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .carousel-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2em;
+            }
+
+            .carousel-nav.prev {
+                left: 5px;
+            }
+
+            .carousel-nav.next {
+                right: 5px;
+            }
+
+            .riasec-carousel {
+                margin: 0 -10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/ikigais-logo-animated.svg') }}" alt="Ikigai App Logo" class="logo-img">
+                <span><bold>ikigais.</bold>app</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/careers">Carreras</a></li>
+                <li><a href="/test/intro">Test</a></li>
+                <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec" class="active">RIASEC</a></li>
+                <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
+                <li id="user-menu" style="display: none;">
+                    <span id="user-name" class="user-greeting"></span>
+                    <a href="#" onclick="logout()" class="btn-logout">Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="riasec-container">
+        <h1>Test RIASEC</h1>
+        <p class="subtitle">Descubre tu perfil profesional según Holland</p>
+
+        <div class="riasec-description">
+            <h3>¿Qué es el Test RIASEC?</h3>
+            <p>El test RIASEC es una herramienta basada en la teoría de John Holland que clasifica los intereses vocacionales en 6 tipos principales. Estos tipos ayudan a identificar carreras y profesiones que se alinean con tus preferencias y fortalezas.</p>
+        </div>
+
+        <div class="riasec-box">
+            <div class="riasec-carousel">
+                <button class="carousel-nav prev" id="prevBtn" onclick="moveCarousel(-1)">&#10094;</button>
+                <button class="carousel-nav next" id="nextBtn" onclick="moveCarousel(1)">&#10095;</button>
+                
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carouselTrack">
+                        <div class="carousel-item">
+                            <div class="riasec-type realistic" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">R</div>
+                                <small style="font-size: 0.3em;">Realista</small>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="riasec-type investigative" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">I</div>
+                                <small style="font-size: 0.3em;">Investigador</small>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="riasec-type artistic" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">A</div>
+                                <small style="font-size: 0.3em;">Artístico</small>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="riasec-type social" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">S</div>
+                                <small style="font-size: 0.3em;">Social</small>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="riasec-type enterprising" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">E</div>
+                                <small style="font-size: 0.3em;">Emprendedor</small>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="riasec-type conventional" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 0.6em; margin-bottom: 10px;">C</div>
+                                <small style="font-size: 0.3em;">Convencional</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-indicators" id="indicators"></div>
+        </div>
+
+        <button class="predict-btn" onclick="startTest()" style="background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.35em; font-weight: 800; padding: 22px 40px; width: 360px; margin-left: auto; margin-right: auto; display: block; white-space: nowrap; line-height: 1.1; text-align: center; overflow: hidden;">Comenzar Test RIASEC</button>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 ikigais.app - Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visits.js') }}"></script>
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 6;
+
+        function initCarousel() {
+            // Crear indicadores
+            const indicatorsContainer = document.getElementById('indicators');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                indicatorsContainer.appendChild(dot);
+            }
+            updateCarousel();
+        }
+
+        function moveCarousel(direction) {
+            currentSlide += direction;
+            
+            // Limitar movimiento
+            if (currentSlide < 0) {
+                currentSlide = 0;
+            } else if (currentSlide >= totalSlides) {
+                currentSlide = totalSlides - 1;
+            }
+            
+            updateCarousel();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const track = document.getElementById('carouselTrack');
+            const offset = -currentSlide * 100;
+            track.style.transform = `translateX(${offset}%)`;
+
+            // Actualizar indicadores
+            const dots = document.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function startTest() {
+            // Redirigir al test vocacional
+            window.location.href = '/test/intro';
+        }
+
+        // Inicializar carrusel cuando carga la página
+        document.addEventListener('DOMContentLoaded', initCarousel);
+    </script>
+</body>
+</html>
