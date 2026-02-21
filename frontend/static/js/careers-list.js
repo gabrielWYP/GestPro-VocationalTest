@@ -58,15 +58,16 @@ function setCachedCareers(data) {
 /**
  * Cargar TODAS las carreras con todos sus datos
  * Se hace una sola llamada y se guarda en cache
+ * OPTIMIZADO: Usa /api/careers/list que es más liviano (sin skills/jobs)
  */
 async function loadAllCareersToCache() {
     // Si ya hay cache válido, retornarlo
     let cached = getCachedCareers();
     if (cached) return cached;
 
-    // Si no hay cache, cargar desde API
-    console.log('Cargando todas las carreras desde API...');
-    const response = await fetch('/api/careers/all');
+    // Si no hay cache, cargar desde API (endpoint más liviano)
+    console.log('Cargando carreras desde API...');
+    const response = await fetch('/api/careers/list');
     const data = await response.json();
 
     if (data.success) {
@@ -79,7 +80,7 @@ async function loadAllCareersToCache() {
 
 async function refreshCareersInBackground(grid) {
     try {
-        const response = await fetch('/api/careers/all');
+        const response = await fetch('/api/careers/list');
         const data = await response.json();
 
         if (data.success) {
@@ -93,30 +94,44 @@ async function refreshCareersInBackground(grid) {
 
 function renderCareers(grid, careers) {
     grid.innerHTML = '';
+    
+    // Usar DocumentFragment para evitar 60 reflows
+    const fragment = document.createDocumentFragment();
 
     for (const career of careers) {
         const card = document.createElement('div');
         card.className = 'career-card';
         card.style.cursor = 'pointer';
+        card.dataset.careerId = career.id;  // Guardar ID en data attribute
         card.innerHTML = `
-            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image">` : '📚'}</div>
+            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image" loading="lazy">` : '📚'}</div>
             <h3>${career.name}</h3>
         `;
 
-        card.onclick = () => {
-            window.location.href = `/career-detail?id=${career.id}`;
-        };
-
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px)';
-        });
-
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-
-        grid.appendChild(card);
+        fragment.appendChild(card);
     }
+
+    grid.appendChild(fragment);  // Un solo reflow aquí
+
+    // Event delegation: un listener para todas las cards
+    grid.addEventListener('click', (e) => {
+        const card = e.target.closest('.career-card');
+        if (card) {
+            const careerId = card.dataset.careerId;
+            window.location.href = `/career-detail?id=${careerId}`;
+        }
+    });
+
+    // Event delegation para transform hover
+    grid.addEventListener('mouseenter', (e) => {
+        const card = e.target.closest('.career-card');
+        if (card) card.style.transform = 'translateY(-8px)';
+    }, true);
+
+    grid.addEventListener('mouseleave', (e) => {
+        const card = e.target.closest('.career-card');
+        if (card) card.style.transform = 'translateY(0)';
+    }, true);
 
     if (careers.length === 0) {
         grid.innerHTML = '<p class="no-data">No hay carreras disponibles.</p>';
