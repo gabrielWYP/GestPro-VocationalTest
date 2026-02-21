@@ -18,10 +18,21 @@ class CareerService:
     @staticmethod
     @lru_cache(maxsize=1)
     def _local_images_index() -> dict:
-        """Indexa imágenes locales por nombre normalizado."""
-        images_dir = Path(__file__).resolve().parents[2] / 'frontend' / 'static' / 'images'
+        """Indexa imágenes locales por nombre normalizado.
+        Soporta DOS rutas:
+        1. /app/static/images (en Docker)
+        2. vocational_test_dev/frontend/static/images (en desarrollo local)
+        """
+        current_file = Path(__file__).resolve()
+        
+        # Intentar ruta Docker primero (/app/static/images)
+        images_dir = current_file.parents[1] / 'static' / 'images'
         if not images_dir.exists():
-            logger.warning(f"Directorio de imágenes no existe: {images_dir}")
+            # Fallback a ruta de desarrollo local
+            images_dir = current_file.parents[2] / 'frontend' / 'static' / 'images'
+        
+        if not images_dir.exists():
+            logger.warning(f"Directorio de imágenes no existe en: {images_dir}")
             return {}
 
         index = {}
@@ -30,7 +41,7 @@ class CareerService:
             if normalized_name:
                 index[normalized_name] = image_path.name
         
-        logger.info(f"✓ Índice de imágenes locales cargado: {len(index)} imágenes encontradas")
+        logger.info(f"✓ Índice de imágenes locales cargado: {len(index)} imágenes encontradas en {images_dir}")
         for norm_name, filename in list(index.items())[:3]:  # Log primeras 3
             logger.debug(f"  - {norm_name} → {filename}")
 
