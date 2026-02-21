@@ -1,2 +1,5 @@
 .env
 *.pyc
+.venv
+*_*AGENT.md
+*.sh

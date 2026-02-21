@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/advisory.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -27,6 +28,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -51,13 +53,12 @@
         </div>
     </section>
 
-    <section class="cta-section">
+        <section class="cta-section">
         <div class="container">
             <h2>¿Listo para descubrir tu carrera ideal?</h2>
             <a href="/test" class="btn btn-primary">Hacer el Test</a>
         </div>
     </section>
-
     <footer>
         <div class="container">
             <p>&copy; 2024 Test de Orientación Vocacional. Todos los derechos reservados.</p>
@@ -65,7 +66,11 @@
         </div>
     </footer>
 
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+
     <script src="{{ url_for('static', filename='js/careers-list.js') }}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>

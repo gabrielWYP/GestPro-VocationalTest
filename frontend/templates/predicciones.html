@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/predicciones.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -26,6 +27,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -43,27 +45,21 @@
                     <p>Basado en tus respuestas, analizamos qué carreras se ajustan mejor a tu perfil</p>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;">
-                    <!-- Caja original del Canvas -->
-                    <div class="profile-summary" id="profileSummary">
-                        <div id="riasecTitle" style="text-align: center; margin-bottom: 20px; font-size: 1.8em; font-weight: 700; color: #333;"></div>
-                        <div style="max-width: 650px; margin: 0 auto; height: 500px;">
+                <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                    <!-- Canvas centrado -->
+                    <div class="profile-summary" id="profileSummary" style="max-width: 700px; width: 100%;">
+                        <div id="riasecTitle" style="text-align: center; margin-bottom: 8px; font-size: 1.8em; font-weight: 700; color: #333;"></div>
+                        <div style="width: 100%; height: 280px;">
                             <canvas id="riasecChart"></canvas>
                         </div>
-                    </div>
-
-                    <!-- Caja invisible para la flecha -->
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; justify-content: center;" onclick="scrollToResults()">
-                        <div style="font-size: 0.95em; font-weight: 700; color: #667eea; text-align: center;">Revisa tus carreras</div>
-                        <div style="font-size: 2.5em; animation: bounceDown 2s infinite;">⬇️</div>
                     </div>
                 </div>
 
                 <div class="error-message" id="errorMessage"></div>
 
                 <div class="predict-btn-container">
-                    <button class="predict-btn" id="predictBtn" onclick="predictCareers()">
-                        <span class="btn-text">🌈 Predecir mis Carreras</span>
+                    <button class="predict-btn" id="predictBtn" onclick="predictCareers()" style="background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.1em;">
+                        <span class="btn-text">Predecir mis Carreras</span>
                         <div class="loading-spinner"></div>
                     </button>
                 </div>
@@ -74,15 +70,15 @@
                     </div>
 
                     <div class="careers-section">
-                        <h3>✨ Carreras Relacionadas</h3>
+                        <h3 style="font-size: 1.5em;">Carreras Relacionadas</h3>
                         <div class="careers-list" id="careersList">
                             <!-- Se completa con JavaScript -->
                         </div>
                     </div>
 
                     <div class="action-buttons">
-                        <a href="/advisory" class="btn-advisory">📅 Agendar Asesoría</a>
-                        <a href="/" class="btn-home">🏠 Volver al Inicio</a>
+                        <a href="/advisory" class="btn-advisory">Agendar Asesoría</a>
+                        <a href="/" class="btn-home">Volver al Inicio</a>
                     </div>
                 </div>
             </div>
@@ -95,9 +91,13 @@
         </div>
     </footer>
 
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/visits.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/predicciones.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>

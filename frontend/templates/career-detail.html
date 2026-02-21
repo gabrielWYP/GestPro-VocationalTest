@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/career-detail.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -26,6 +27,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -100,7 +102,11 @@
         </div>
     </footer>
 
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+
     <script src="{{ url_for('static', filename='js/career-detail.js') }}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -27,6 +28,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -81,26 +83,26 @@
         <div class="container">
             <h2>Cómo Funciona</h2>
             <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Responde el Test</h3>
-                    <p>Completa 8 preguntas en 5 minutos</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Obtén tu Resultado</h3>
-                    <p>Descubre tu carrera recomendada</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Explora las Opciones</h3>
-                    <p>Conoce más sobre carreras relacionadas</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Agenda Asesoría</h3>
-                    <p>Habla con un profesional de orientación</p>
-                </div>
+            <div class="step" style="border-left: 5px solid #22c55e;">
+                <div class="step-number" style="background-color: #22c55e;">1</div>
+                <h3 style="color: #22c55e;">Responde el Test</h3>
+                <p>Completa 8 preguntas en 5 minutos</p>
+            </div>
+            <div class="step" style="border-left: 5px solid #ef4444;">
+                <div class="step-number" style="background-color: #ef4444;">2</div>
+                <h3 style="color: #ef4444;">Obtén tu Resultado</h3>
+                <p>Descubre tu carrera recomendada</p>
+            </div>
+            <div class="step" style="border-left: 5px solid #f59e0b;">
+                <div class="step-number" style="background-color: #f59e0b;">3</div>
+                <h3 style="color: #f59e0b;">Explora las Opciones</h3>
+                <p>Conoce más sobre carreras relacionadas</p>
+            </div>
+            <div class="step" style="border-left: 5px solid #0284c7;">
+                <div class="step-number" style="background-color: #0284c7;">4</div>
+                <h3 style="color: #0284c7;">Agenda Asesoría</h3>
+                <p>Habla con un profesional de orientación</p>
+            </div>
             </div>
         </div>
     </section>
@@ -112,8 +114,12 @@
         </div>
     </footer>
 
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+
     <!-- Scripts externos -->
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/visits.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>

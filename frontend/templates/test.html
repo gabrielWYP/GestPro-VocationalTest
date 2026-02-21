@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/test.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -26,6 +27,7 @@
                 <li><a href="/careers">Carreras</a></li>
                 <li><a href="/test/intro">Test</a></li>
                 <li><a href="/advisory">Asesoría</a></li>
+                <li><a href="/riasec">RIASEC</a></li>
                 <li id="login-link"><a href="/login" class="btn-login">Iniciar Sesión</a></li>
                 <li id="user-menu" style="display: none;">
                     <span id="user-name" class="user-greeting"></span>
@@ -39,11 +41,11 @@
         <div class="container">
             <div id="test-container">
                 <div id="intro" class="test-intro">
-                    <h1>Test de Orientación Vocacional</h1>
-                    <p>Responde las siguientes preguntas con honestidad y sinceridad.</p>
-                    <p>Esto consta de 2 pruebas cortas que te tomarán aproximadamente 10 minutos en total.</p>
+                    <h1 style="color: #3d2817; font-size: 2.5em; font-weight: 700; line-height: 1.1;">Test de Orientación Vocacional</h1>
+                    <p style="margin-bottom: 0.3cm; font-size: 1em !important; color: #6b7280;">Responde las siguientes preguntas con honestidad y sinceridad.</p>
+                    <p style="margin-bottom: 0.5cm; font-size: 1em !important; color: #6b7280;">Esto consta de 2 pruebas cortas que te tomarán aproximadamente 10 minutos en total.</p>
                     
-                    <button onclick="startTest()" class="btn btn-primary">Comenzar Test</button>
+                    <button onclick="startTest()" class="btn btn-primary" style="background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.2em;">Comenzar Test</button>
                 </div>
 
                 <div id="questions" style="display: none;">
@@ -102,5 +104,9 @@
         // Ejecutar verificación cuando carga el documento
         document.addEventListener('DOMContentLoaded', checkSessionBeforeTest);
     </script>
+
+    <!-- NPS Modal -->
+    {% include 'nps-modal.html' %}
+    <script src="{{ url_for('static', filename='js/nps-universal.js') }}"></script>
 </body>
 </html>
