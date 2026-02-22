@@ -80,21 +80,23 @@
 }
 
 .btn-login-form {
-    background: var(--primary-color);
+    background: #3B8FB3;
     color: white;
-    padding: 0.9rem 2rem;
-    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
     border: none;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 0.5rem;
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .btn-login-form:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
 }
 
 .btn-login-form:active {
@@ -131,14 +133,14 @@
 }
 
 .auth-footer a {
-    color: var(--primary-color);
+    color: #3B8FB3;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .auth-footer a:hover {
-    color: var(--secondary-color);
+    color: #327a99;
     text-decoration: underline;
 }
 

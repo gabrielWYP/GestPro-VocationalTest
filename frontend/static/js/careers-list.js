@@ -2,8 +2,15 @@
 // Endpoint: GET /api/careers/all - datos completos (id, nombre, icono, descripción, skills, jobs)
 // Con localStorage para cachear durante 1 día
 
-const CAREERS_CACHE_KEY = 'careers_full_cache_v2';
+const CAREERS_CACHE_KEY = 'careers_full_cache_v3';
+const LEGACY_CACHE_KEYS = ['careers_full_cache', 'careers_full_cache_v2'];
 const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+
+function clearLegacyCaches() {
+    for (const key of LEGACY_CACHE_KEYS) {
+        localStorage.removeItem(key);
+    }
+}
 
 function getCacheEntry() {
     const cached = localStorage.getItem(CAREERS_CACHE_KEY);
@@ -104,7 +111,7 @@ function renderCareers(grid, careers) {
         card.style.cursor = 'pointer';
         card.dataset.careerId = career.id;  // Guardar ID en data attribute
         card.innerHTML = `
-            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image" loading="lazy">` : '📚'}</div>
+            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image" loading="lazy">` : ''}</div>
             <h3>${career.name}</h3>
         `;
 
@@ -167,3 +174,5 @@ async function loadCareers() {
 
 // Cargar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', loadCareers);
+
+clearLegacyCaches();

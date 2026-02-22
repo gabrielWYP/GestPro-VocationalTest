@@ -27,17 +27,17 @@
         }
 
         .riasec-container {
-            max-width: 800px;
+            max-width: 720px;
             margin: 40px auto;
             margin-top: 100px;
-            padding: 40px;
+            padding: 28px;
             background: white;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .riasec-container h1 {
-            color: #333;
+            color: #3B8FB3;
             margin-bottom: 0;
             font-size: 2.5em;
             text-align: center;
@@ -62,8 +62,8 @@
         }
 
         .riasec-carousel .riasec-type {
-            min-height: 520px !important;
-            padding: 80px 20px !important;
+            min-height: 450px !important;
+            padding: 48px 16px !important;
         }
 
         .riasec-box:hover {
@@ -95,7 +95,7 @@
         }
 
         .riasec-description h3 {
-            color: #333;
+            color: #3B8FB3;
             margin-bottom: 15px;
         }
 
@@ -108,6 +108,7 @@
         .riasec-carousel {
             position: relative;
             margin-bottom: 30px;
+            z-index: 1;
         }
 
         .carousel-container {
@@ -165,10 +166,13 @@
         }
 
         .carousel-indicators {
+            position: relative;
+            z-index: 20;
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 4px;
         }
 
         .carousel-dot {
@@ -191,7 +195,7 @@
         .riasec-type {
             background: #fff;
             color: #2f2f2f;
-            border: 2px solid #e5e7eb;
+            border: none;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
@@ -204,34 +208,58 @@
             transition: color 0.3s ease;
         }
 
+        .riasec-name {
+            order: -1;
+            margin-bottom: 12px;
+            font-size: 0.56em !important;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .riasec-type-description {
+            margin-top: 4px;
+            max-width: 650px;
+            font-size: 0.18em;
+            line-height: 1.2;
+            color: #4a4a4a;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .riasec-image {
+            width: 470px;
+            height: 470px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .riasec-type.realistic .riasec-image {
+            width: 350px;
+            height: 350px;
+        }
+
         .riasec-type.realistic {
-            background: #A8D5BA;
-            border-color: #A8D5BA;
+            background: #ffffff;
         }
 
         .riasec-type.investigative {
-            background: #C9D8FF;
-            border-color: #C9D8FF;
+            background: #ffffff;
         }
 
         .riasec-type.artistic {
-            background: #F8C8DC;
-            border-color: #F8C8DC;
+            background: #ffffff;
         }
 
         .riasec-type.social {
-            background: #BEE3F8;
-            border-color: #BEE3F8;
+            background: #ffffff;
         }
 
         .riasec-type.enterprising {
-            background: #FFD6A5;
-            border-color: #FFD6A5;
+            background: #ffffff;
         }
 
         .riasec-type.conventional {
-            background: #E2E2E2;
-            border-color: #E2E2E2;
+            background: #ffffff;
         }
 
         .riasec-carousel.riasec-R .carousel-dot.active { background: #A8D5BA; border-color: #8bb89d; }
@@ -245,6 +273,13 @@
         .riasec-name {
             color: #2f2f2f !important;
         }
+
+        .riasec-type.realistic .riasec-name { color: #8bb89d !important; }
+        .riasec-type.investigative .riasec-name { color: #a9b7db !important; }
+        .riasec-type.artistic .riasec-name { color: #d7a8bc !important; }
+        .riasec-type.social .riasec-name { color: #f2c94c !important; }
+        .riasec-type.enterprising .riasec-name { color: #dfb685 !important; }
+        .riasec-type.conventional .riasec-name { color: #9a9a9a !important; }
 
         .predict-btn {
             background: linear-gradient(135deg, #5b7ef7 0%, #8bbbee 100%);
@@ -315,11 +350,9 @@
 
     <div class="riasec-container">
         <h1>Test RIASEC</h1>
-        <p class="subtitle">Descubre tu perfil profesional</p>
 
         <div class="riasec-description">
-            <h3>¿Qué es el Test RIASEC?</h3>
-            <p>El test RIASEC es una herramienta basada en la teoría de John Holland que clasifica los intereses vocacionales en 6 tipos principales. Estos tipos ayudan a identificar carreras y profesiones que se alinean con tus preferencias y fortalezas.</p>
+            <p>El test RIASEC es una herramienta basada en la teoría de John Holland que clasifica los intereses vocacionales en 6 tipos principales.</p>
         </div>
 
         <div class="riasec-box">
@@ -331,48 +364,54 @@
                     <div class="carousel-track" id="carouselTrack">
                         <div class="carousel-item" data-riasec="R">
                             <div class="riasec-type realistic" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">R</div>
+                                <img src="{{ url_for('static', filename='images/Realista.svg') }}" alt="Realista" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Realista</small>
+                                <p class="riasec-type-description">Práctico, directo y orientado a la acción. Disfrutas trabajar con herramientas, máquinas o actividades físicas. Prefieres resultados concretos antes que discusiones teóricas. Te sientes cómodo resolviendo problemas reales con soluciones tangibles.</p>
                             </div>
                         </div>
                         <div class="carousel-item" data-riasec="I">
                             <div class="riasec-type investigative" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">I</div>
+                                <img src="{{ url_for('static', filename='images/Investigador 2.svg') }}" alt="Investigador" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Investigador</small>
+                                <p class="riasec-type-description">Analítico y curioso. Te motiva entender cómo funcionan las cosas y descubrir nuevas ideas. Disfrutas investigar, analizar datos y pensar de forma crítica. Prefieres retos intelectuales antes que tareas repetitivas.</p>
                             </div>
                         </div>
                         <div class="carousel-item" data-riasec="A">
                             <div class="riasec-type artistic" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">A</div>
+                                <img src="{{ url_for('static', filename='images/Artistico 2.svg') }}" alt="Artístico" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Artístico</small>
+                                <p class="riasec-type-description">Creativo y expresivo. Te gusta imaginar, diseñar y comunicar ideas originales. Valoras la libertad, la innovación y la estética. Prefieres entornos flexibles donde puedas aportar tu estilo propio.</p>
                             </div>
                         </div>
                         <div class="carousel-item" data-riasec="S">
                             <div class="riasec-type social" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">S</div>
+                                <img src="{{ url_for('static', filename='images/Social 2.svg') }}" alt="Social" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Social</small>
+                                <p class="riasec-type-description">Empático y colaborativo. Te energiza ayudar a otros, enseñar o trabajar en equipo. Buscas generar impacto positivo en las personas. Prefieres ambientes donde la comunicación y la cooperación sean clave.</p>
                             </div>
                         </div>
                         <div class="carousel-item" data-riasec="E">
                             <div class="riasec-type enterprising" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">E</div>
+                                <img src="{{ url_for('static', filename='images/Emprendedor 2.svg') }}" alt="Emprendedor" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Emprendedor</small>
+                                <p class="riasec-type-description">Líder y persuasivo. Te gusta tomar decisiones, organizar proyectos y asumir riesgos. Disfrutas influir, negociar y convertir ideas en acción. Prefieres entornos dinámicos donde puedas marcar dirección.</p>
                             </div>
                         </div>
                         <div class="carousel-item" data-riasec="C">
                             <div class="riasec-type conventional" style="width: 100%; margin: 0; padding: 40px 20px; font-size: 5em; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="riasec-letter" style="font-size: 0.6em; margin-bottom: 10px;">C</div>
+                                <img src="{{ url_for('static', filename='images/Convencional 2.svg') }}" alt="Convencional" class="riasec-image">
                                 <small class="riasec-name" style="font-size: 0.3em;">Convencional</small>
+                                <p class="riasec-type-description">Organizado y meticuloso. Te sientes cómodo con estructura, reglas claras y procesos definidos. Disfrutas trabajar con datos, sistemas y planificación. Prefieres precisión y orden antes que improvisación.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="carousel-indicators" id="indicators"></div>
+                <div class="carousel-indicators" id="indicators"></div>
+            </div>
         </div>
 
-        <button class="predict-btn" onclick="startTest()" style="background: #f3f9ff; color: #4a4a4a; border: 2px solid transparent; background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.35em; font-weight: 800; padding: 22px 40px; width: 360px; margin-left: auto; margin-right: auto; display: block; white-space: nowrap; line-height: 1.1; text-align: center; overflow: hidden;">Comenzar Test RIASEC</button>
+        <button class="predict-btn" onclick="startTest()" style="background: #3B8FB3; color: #ffffff; border: 2px solid transparent; box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12); font-size: 1.35em; font-weight: 800; padding: 22px 40px; width: 360px; margin-left: auto; margin-right: auto; display: block; white-space: nowrap; line-height: 1.1; text-align: center; overflow: hidden;">Comenzar Test RIASEC</button>
     </div>
 
     <footer class="footer">
@@ -388,6 +427,14 @@
         let totalSlides = 0;
         let isAnimating = false;
         let profileTypes = [];
+        const RIasecDotColors = {
+            R: { bg: '#A8D5BA', border: '#8bb89d' },
+            I: { bg: '#C9D8FF', border: '#a9b7db' },
+            A: { bg: '#F8C8DC', border: '#d7a8bc' },
+            S: { bg: '#BEE3F8', border: '#9ec3d8' },
+            E: { bg: '#FFD6A5', border: '#dfb685' },
+            C: { bg: '#E2E2E2', border: '#c2c2c2' }
+        };
 
         function initCarousel() {
             const track = document.getElementById('carouselTrack');
@@ -449,8 +496,18 @@
 
         function updateIndicators(realIndex) {
             const dots = document.querySelectorAll('.carousel-dot');
+            const activeType = profileTypes[realIndex] || 'R';
+            const palette = RIasecDotColors[activeType] || RIasecDotColors.R;
+
             dots.forEach((dot, index) => {
                 dot.classList.toggle('active', index === realIndex);
+                if (index === realIndex) {
+                    dot.style.background = palette.bg;
+                    dot.style.border = `1px solid ${palette.border}`;
+                } else {
+                    dot.style.background = 'rgba(122, 197, 235, 0.45)';
+                    dot.style.border = 'none';
+                }
             });
         }
 

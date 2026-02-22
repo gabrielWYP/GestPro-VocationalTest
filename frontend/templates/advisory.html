@@ -14,6 +14,171 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nps.css') }}">
+    <style>
+        .advisory-section {
+            --advisory-primary: #b08968;
+            --advisory-primary-soft: #c8a98f;
+            --advisory-light: #f6eee7;
+            --advisory-border: #e3d2c3;
+        }
+
+        .advisory-section h1,
+        .advisory-section .advisory-info h2,
+        .advisory-section .available-slots h3,
+        .advisory-section .my-bookings-section h3,
+        .advisory-section .booking-career,
+        .advisory-section .booking-link,
+        .advisory-section .meeting-link,
+        .advisory-section .form-group select optgroup,
+        .advisory-section .advisory-form-container h3 {
+            color: var(--advisory-primary);
+        }
+
+        .advisory-section h1 {
+            font-size: 3rem;
+            color: #2a1f19;
+            line-height: 1.1;
+        }
+
+        .advisory-section .advisory-info h2 {
+            color: #2a1f19;
+            line-height: 1.1;
+        }
+
+        .advisory-section .available-slots h3 {
+            color: #3b82c4;
+        }
+
+        .advisory-section .advisory-form-container h3 {
+            color: #3b82c4;
+            line-height: 1.1;
+        }
+
+        .advisory-section .duration,
+        .advisory-section .price,
+        .advisory-section .time-slots-grid {
+            background: var(--advisory-light);
+        }
+
+        .advisory-section .duration,
+        .advisory-section .price {
+            background: #eaf6ff;
+        }
+
+        .advisory-section .time-slots-grid {
+            background: #eaf6ff;
+        }
+
+        .advisory-section .form-group input:focus,
+        .advisory-section .form-group select:focus,
+        .advisory-section .form-group textarea:focus {
+            border-color: #3b82c4;
+            box-shadow: 0 0 0 3px rgba(59, 130, 196, 0.16);
+            background-color: #f3f9ff;
+        }
+
+        .advisory-section .form-group input:hover,
+        .advisory-section .form-group select:hover,
+        .advisory-section .form-group textarea:hover,
+        .advisory-section .date-button:hover,
+        .advisory-section .time-slot-btn:hover,
+        .advisory-section .booking-card:hover {
+            border-color: var(--advisory-primary);
+        }
+
+        .advisory-section .form-group input:hover,
+        .advisory-section .form-group select:hover,
+        .advisory-section .form-group textarea:hover {
+            border-color: #3b82c4;
+        }
+
+        .advisory-section .date-button:hover {
+            border-color: #3b82c4;
+            background-color: #eaf6ff;
+            color: #3b82c4;
+        }
+
+        .advisory-section .time-slot-btn:hover {
+            border-color: #3b82c4;
+            background-color: #eaf6ff;
+            color: #3b82c4;
+        }
+
+        .advisory-section .date-button.active {
+            border-color: #3b82c4;
+            background-color: #3b82c4;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 196, 0.28);
+        }
+
+        .advisory-section .time-slot-btn.selected {
+            border-color: #3b82c4;
+            background-color: #3b82c4;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 196, 0.28);
+        }
+
+        .advisory-section .form-group select optgroup {
+            color: #3b82c4;
+        }
+
+        .advisory-section .booking-card:hover {
+            box-shadow: 0 2px 8px rgba(176, 137, 104, 0.16);
+        }
+
+        .advisory-section .booking-career,
+        .advisory-section .booking-link,
+        .advisory-section .meeting-link {
+            color: #3b82c4;
+        }
+
+        .advisory-section .my-bookings-section h3 {
+            color: #2a1f19;
+        }
+
+        .advisory-section .booking-card:hover {
+            border-color: #3b82c4;
+            box-shadow: 0 2px 8px rgba(59, 130, 196, 0.2);
+        }
+
+        .advisory-section .advisory-test-btn {
+            background: #f3f9ff;
+            color: #4a4a4a;
+            border: 2px solid transparent;
+            background-image: linear-gradient(#f3f9ff, #f3f9ff), linear-gradient(90deg, rgba(143, 191, 224, 0.25) 0%, rgba(168, 214, 206, 0.25) 33%, rgba(186, 231, 221, 0.25) 66%, rgba(205, 236, 226, 0.25) 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12);
+            border-radius: 50px;
+        }
+
+        .advisory-section .advisory-test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(60, 60, 60, 0.12);
+        }
+
+        .nav-menu .btn-login,
+        .nav-menu .btn-logout {
+            background: #3B8FB3;
+            color: white !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .nav-menu .btn-login:hover,
+        .nav-menu .btn-logout:hover {
+            background: #327a99;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -57,7 +222,7 @@
                 </div>
 
                 <div class="advisory-form-container">
-                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">Agendar tu Asesoría</h3>
+                    <h3 style="color: #3b82c4; margin-bottom: 1.5rem;">Agendar tu Asesoría</h3>
                     <form id="advisoryForm" class="advisory-form">
                         <div class="form-group">
                             <label for="name">Nombre Completo</label>
@@ -89,7 +254,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Agendar Asesoría</button>
+                        <button type="submit" class="btn btn-primary advisory-test-btn">Agendar Asesoría</button>
                     </form>
 
                     <div id="successMessage" style="display: none;" class="success-message">
