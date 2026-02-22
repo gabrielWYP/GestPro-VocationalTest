@@ -55,3 +55,11 @@
     color: #475569;
     font-weight: 400;
 }
+
+.hero .btn.btn-primary {
+    background: #3B8FB3;
+}
+
+.hero .btn.btn-primary:hover {
+    background: #327a99;
+}

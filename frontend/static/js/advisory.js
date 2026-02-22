@@ -91,10 +91,10 @@ function showLoginRequired() {
         loginMsg.className = 'login-required-msg';
         loginMsg.innerHTML = `
             <div style="text-align: center; padding: 2rem;">
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Inicia sesión para agendar</h3>
+                <h3 style="color: #3B8FB3; margin-bottom: 1rem;">Inicia sesión para agendar</h3>
                 <p style="margin-bottom: 1.5rem; color: #666;">Necesitas tener una cuenta para poder reservar una asesoría con nuestros orientadores.</p>
-                <a href="/login" class="btn btn-primary" style="margin-right: 0.5rem;">Iniciar Sesión</a>
-                <a href="/register" class="btn btn-secondary">Registrarse</a>
+                <a href="/login" class="btn" style="margin-right: 0.5rem; background: #3B8FB3; color: #fff; border-radius: 50px; padding: 0.6rem 1.5rem;">Iniciar Sesión</a>
+                <a href="/register" class="btn" style="background: #3B8FB3; color: #fff; border-radius: 50px; padding: 0.6rem 1.5rem;">Registrarse</a>
             </div>
         `;
         formContainer.appendChild(loginMsg);

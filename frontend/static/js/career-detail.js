@@ -90,11 +90,10 @@ async function loadCareerDetail() {
             return;
         }
 
-        // Actualizar encabezado
-        document.getElementById('career-name').textContent = career.name;
-        document.getElementById('career-tagline').textContent = career.description || '';
         document.getElementById('career-title').textContent = career.name;
-        document.getElementById('career-icon').textContent = career.icon || '📚';
+        const careerIcon = document.getElementById('career-icon');
+        careerIcon.textContent = career.icon || '';
+        careerIcon.style.display = career.icon ? 'block' : 'none';
 
         // Actualizar contenido
         document.getElementById('career-full-description').textContent = career.description || '';
@@ -126,9 +125,6 @@ async function loadCareerDetail() {
             jobsList.innerHTML = '<li>Información no disponible</li>';
         }
 
-        // Cargar carreras relacionadas (desde cache)
-        loadRelatedCareers(careerId);
-
     } catch (error) {
         console.error('Error cargando carrera:', error);
         showError('Error al cargar la carrera');
@@ -143,54 +139,6 @@ function showError(message) {
             <a href="/careers">Volver a carreras</a>
         </div>
     `;
-}
-
-// Cargar carreras relacionadas (usa el cache)
-async function loadRelatedCareers(currentCareerId) {
-    const relatedGrid = document.getElementById('related-grid');
-    relatedGrid.innerHTML = '<p>Cargando...</p>';
-
-    try {
-        // Obtener del cache
-        let cached = getCachedCareers();
-        
-        if (!cached) {
-            // Si no hay cache, cargar desde API
-            const response = await fetch('/api/careers/all');
-            const data = await response.json();
-            if (data.success) {
-                setCachedCareers(data);
-                cached = data;
-            } else {
-                relatedGrid.innerHTML = '';
-                return;
-            }
-        }
-
-        relatedGrid.innerHTML = '';
-        let count = 0;
-
-        for (const career of cached.careers) {
-            if (career.id != currentCareerId && count < 3) {
-                const card = document.createElement('div');
-                card.className = 'related-career-card';
-                card.innerHTML = `
-                    <div class="icon">${career.icon || '📚'}</div>
-                    <h4>${career.name}</h4>
-                    <p>${career.description}</p>
-                `;
-                card.onclick = () => {
-                    window.location.href = `/career-detail?id=${career.id}`;
-                };
-                relatedGrid.appendChild(card);
-                count++;
-            }
-        }
-
-    } catch (error) {
-        console.error('Error cargando carreras relacionadas:', error);
-        relatedGrid.innerHTML = '';
-    }
 }
 
 // Cargar cuando el DOM esté listo

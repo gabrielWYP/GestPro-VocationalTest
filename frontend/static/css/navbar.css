@@ -59,7 +59,7 @@
 }
 
 .nav-menu .btn-login {
-    background: var(--primary-color);
+    background: #3B8FB3;
     color: white !important;
     padding: 0.6rem 1.5rem;
     border-radius: 50px;
@@ -74,7 +74,8 @@
 
 .nav-menu .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 16px rgba(59, 143, 179, 0.3);
+    background: #327a99;
     color: white !important;
 }
 
@@ -93,7 +94,7 @@
 }
 
 .btn-logout {
-    background: var(--secondary-color, #5b7ef7);
+    background: #3B8FB3;
     color: white !important;
     padding: 0.6rem 1.5rem;
     border-radius: 50px;
@@ -109,6 +110,7 @@
 
 .btn-logout:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 16px rgba(59, 143, 179, 0.3);
+    background: #327a99;
     color: white !important;
 }
