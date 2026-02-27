@@ -93,4 +93,5 @@ jobs:
     uses: gabrielWYP/K3S_Infra/.github/workflows/deploy-vocational-test.yml@main
     with:
       image-tag: ${{ needs.build-and-push.outputs.image-tag }}
-    secrets: inherit
+    secrets:
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
