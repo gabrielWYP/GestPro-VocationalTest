@@ -17,6 +17,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image-tag: ${{ steps.image-tag.outputs.tag }}
 
     steps:
       - name: Checkout código
@@ -46,6 +48,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build y Push a GHCR
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -56,8 +59,38 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
+      - name: Extraer image tag
+        id: image-tag
+        if: github.event_name != 'pull_request'
+        run: |
+          # Extraer el tag de la metadata (main-<short-sha>)
+          TAGS="${{ steps.meta.outputs.tags }}"
+          
+          # Obtener el primer tag que tenga formato main-
+          IMAGE_TAG=$(echo "$TAGS" | grep -oP 'main-[a-f0-9]+' | head -1)
+          
+          if [ -z "$IMAGE_TAG" ]; then
+            # Fallback: usar commit SHA corto
+            IMAGE_TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
+          fi
+          
+          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "📦 Image tag: ${IMAGE_TAG}"
+
       - name: Mostrar resumen
         run: |
-          echo "✅ Workflow completado"
+          echo "✅ Build completado"
           echo "📦 Imagen: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           echo "🏷️  Tags: ${{ steps.meta.outputs.tags }}"
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "📦 Image tag exportado: ${{ steps.image-tag.outputs.tag }}"
+          fi
+
+  deploy-to-k3s:
+    name: Deploy to K3S
+    needs: build-and-push
+    if: github.event_name != 'pull_request'
+    uses: gabrielWYP/K3S_Infra/.github/workflows/deploy-vocational-test.yml@main
+    with:
+      image-tag: ${{ needs.build-and-push.outputs.image-tag }}
+    secrets: inherit
