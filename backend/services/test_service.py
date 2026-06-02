@@ -135,28 +135,33 @@ class TestService:
             with OracleConnection() as conn:
                 cursor = conn.cursor()
                 
-                for answer in answers:
-                    merge_sql = f"""
-                    MERGE INTO {ORACLE_SCHEMA}.USUARIO_AFIRMACION_RPTA t
-                    USING (SELECT :usuario_id as usuario_id, 
-                                  :afirmacion_id as afirmacion_id,
-                                  :riasec_id as riasec_id
-                           FROM dual) s
-                    ON (t.usuario_id = s.usuario_id AND t.afirmacion_id = s.afirmacion_id)
-                    WHEN MATCHED THEN
-                        UPDATE SET t.riasec_id = s.riasec_id,
-                                   t.estampa = CURRENT_TIMESTAMP
-                    WHEN NOT MATCHED THEN
-                        INSERT (usuario_id, afirmacion_id, riasec_id, estampa)
-                        VALUES (s.usuario_id, s.afirmacion_id, s.riasec_id, CURRENT_TIMESTAMP)
-                    """
-                    
-                    cursor.execute(merge_sql, {
+                # OPTIMIZADO: executemany envía el statement una sola vez
+                # y itera sobre los bind values, reduciendo round-trips a Oracle
+                merge_sql = f"""
+                MERGE INTO {ORACLE_SCHEMA}.USUARIO_AFIRMACION_RPTA t
+                USING (SELECT :usuario_id as usuario_id, 
+                              :afirmacion_id as afirmacion_id,
+                              :riasec_id as riasec_id
+                       FROM dual) s
+                ON (t.usuario_id = s.usuario_id AND t.afirmacion_id = s.afirmacion_id)
+                WHEN MATCHED THEN
+                    UPDATE SET t.riasec_id = s.riasec_id,
+                               t.estampa = CURRENT_TIMESTAMP
+                WHEN NOT MATCHED THEN
+                    INSERT (usuario_id, afirmacion_id, riasec_id, estampa)
+                    VALUES (s.usuario_id, s.afirmacion_id, s.riasec_id, CURRENT_TIMESTAMP)
+                """
+                
+                bind_values = [
+                    {
                         'usuario_id': usuario_id,
                         'afirmacion_id': answer['afirmacion_id'],
                         'riasec_id': answer['riasec_id']
-                    })
+                    }
+                    for answer in answers
+                ]
                 
+                cursor.executemany(merge_sql, bind_values)
                 conn.commit()
                 cursor.close()
                 

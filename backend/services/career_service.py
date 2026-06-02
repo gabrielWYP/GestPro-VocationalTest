@@ -110,31 +110,69 @@ class CareerService:
     
     @staticmethod
     @lru_cache(maxsize=128)
-    def get_careers_list() -> tuple:
+    def get_careers_list(page: int = 1, per_page: int = 12) -> dict:
         """
-        Obtener lista básica de carreras (solo id, nombre, icono, descripción)
-        Para la página de listado de carreras - más liviano
-        Cacheado: máximo 128 resultados en memoria
+        Obtener lista paginada de carreras (id, nombre, icono, descripción)
+        
+        Args:
+            page: número de página (1-indexed)
+            per_page: carreras por página (default 12)
+            
+        Returns:
+            dict con careers, metadatos de paginación y success
         """
         try:
+            offset = (page - 1) * per_page
+            
             with OracleConnection() as conn:
                 with conn.cursor() as cursor:
+                    # COUNT(*) OVER() obtiene el total en la misma query
+                    # evitando un segundo round-trip a Oracle
                     cursor.execute(
-                        f"SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO ORDER BY CARRERA"
+                        f"""SELECT ID, CARRERA, DESCRIPCION, AFINIDAD, URL,
+                                   COUNT(*) OVER() AS TOTAL_COUNT
+                            FROM {ORACLE_SCHEMA}.CARRERAS_NUEVO
+                            ORDER BY CARRERA
+                            OFFSET :offset ROWS FETCH NEXT :per_page ROWS ONLY""",
+                        {'offset': offset, 'per_page': per_page}
                     )
                     rows = cursor.fetchall()
                     
-                    result = tuple({
+                    total = rows[0][5] if rows else 0
+                    total_pages = max(1, (total + per_page - 1) // per_page) if total > 0 else 1
+                    
+                    careers = tuple({
                         'id': row[0],
                         'name': row[1],
                         'description': row[2],
                         'afinidad': row[3],
                         'url': CareerService._build_image_url(row[1], row[4])
                     } for row in rows)
-                    return result
+                    
+                    return {
+                        'success': True,
+                        'careers': careers,
+                        'total': total,
+                        'page': page,
+                        'per_page': per_page,
+                        'total_pages': total_pages,
+                        'has_next': page < total_pages,
+                        'has_prev': page > 1
+                    }
+                    
         except Exception as e:
-            print(f"Error obteniendo lista de carreras: {e}")
-            return ()
+            logger.error(f"Error obteniendo lista de carreras: {e}")
+            return {
+                'success': False,
+                'message': 'Error obteniendo carreras',
+                'careers': (),
+                'total': 0,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': 0,
+                'has_next': False,
+                'has_prev': False
+            }
     
     @staticmethod
     @lru_cache(maxsize=128)

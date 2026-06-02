@@ -5,6 +5,8 @@ Obtiene datos de USUARIO_AFIRMACION_RPTA y calcula similitud con MODELO_CONVERSI
 import numpy as np
 import logging
 import ast
+from functools import lru_cache
+from sklearn.metrics.pairwise import cosine_similarity
 from db.db_config import OracleConnection
 from config import ORACLE_SCHEMA
 from utils.errors import DatabaseError
@@ -68,6 +70,7 @@ class PredictionsService:
             raise DatabaseError(f"Error obteniendo perfil RIASEC: {str(e)}")
     
     @staticmethod
+    @lru_cache(maxsize=1)
     def get_occupations_model() -> list:
         """
         Obtiene todas las ocupaciones del modelo MODELO_CONVERSIONES
@@ -250,7 +253,6 @@ class PredictionsService:
             occupation_vectors = np.array([occ['vector'] for occ in occupations])
             
             # Calcular cosine similarity
-            from sklearn.metrics.pairwise import cosine_similarity
             similarities = cosine_similarity(
                 user_vector.reshape(1, -1),
                 occupation_vectors

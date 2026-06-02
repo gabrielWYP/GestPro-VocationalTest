@@ -1,10 +1,20 @@
-// Cargar carreras desde la API (Oracle Autonomous Database)
-// Endpoint: GET /api/careers/all - datos completos (id, nombre, icono, descripción, skills, jobs)
-// Con localStorage para cachear durante 1 día
+/**
+ * Listado de carreras con paginación
+ * Carga 12 carreras por página con botón "Cargar más"
+ * Cache en localStorage para visitas repetidas
+ */
 
-const CAREERS_CACHE_KEY = 'careers_full_cache_v3';
-const LEGACY_CACHE_KEYS = ['careers_full_cache', 'careers_full_cache_v2'];
-const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día en milisegundos
+const PER_PAGE = 12;
+const CAREERS_CACHE_KEY = 'careers_full_cache_v4';
+const LEGACY_CACHE_KEYS = ['careers_full_cache', 'careers_full_cache_v2', 'careers_full_cache_v3'];
+const CAREERS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 día
+
+// Estado de paginación
+let currentPage = 1;
+let totalPages = 1;
+let accumulatedCareers = [];
+
+// ─── Cache helpers ──────────────────────────────────────────
 
 function clearLegacyCaches() {
     for (const key of LEGACY_CACHE_KEYS) {
@@ -12,124 +22,86 @@ function clearLegacyCaches() {
     }
 }
 
-function getCacheEntry() {
+function getCachedCareers() {
     const cached = localStorage.getItem(CAREERS_CACHE_KEY);
     if (!cached) return null;
-
     try {
         const parsed = JSON.parse(cached);
-        if (!parsed || !parsed.data || !parsed.timestamp) {
+        if (!parsed?.careers || !parsed?.timestamp) {
             localStorage.removeItem(CAREERS_CACHE_KEY);
             return null;
         }
-        return parsed;
-    } catch (error) {
-        console.error('Error leyendo cache de carreras:', error);
+        if (Date.now() - parsed.timestamp < CAREERS_CACHE_EXPIRY) {
+            return parsed.careers;
+        }
+    } catch (e) {
         localStorage.removeItem(CAREERS_CACHE_KEY);
-        return null;
     }
-}
-
-/**
- * Obtener datos del cache si existen y no han expirado
- * @returns {Object|null} Datos cacheados o null
- */
-function getCachedCareers() {
-    const entry = getCacheEntry();
-    if (!entry) return null;
-
-    const now = Date.now();
-    if (now - entry.timestamp < CAREERS_CACHE_EXPIRY) {
-        console.log('Usando carreras en caché');
-        return entry.data;
-    }
-
     return null;
 }
 
-/**
- * Guardar datos en el cache
- * @param {Object} data - Datos a guardar
- */
-function setCachedCareers(data) {
+function setCachedCareers(careers) {
     try {
         localStorage.setItem(CAREERS_CACHE_KEY, JSON.stringify({
-            data: data,
+            careers: careers,
             timestamp: Date.now()
         }));
-    } catch (error) {
-        console.error('Error guardando cache de carreras:', error);
+    } catch (e) {
+        console.warn('No se pudo guardar cache de carreras:', e);
     }
+}
+
+// ─── Fetch ──────────────────────────────────────────────────
+
+/**
+ * Obtiene una página de carreras desde la API
+ * @returns {{careers:Array, total:number, total_pages:number, has_next:boolean}}
+ */
+async function fetchCareersPage(page) {
+    const response = await fetch(`/api/careers/list?page=${page}&per_page=${PER_PAGE}`);
+    const data = await response.json();
+
+    if (!data.success) {
+        throw new Error(data.message || 'Error al cargar carreras');
+    }
+    return data;
+}
+
+// ─── Render ─────────────────────────────────────────────────
+
+function createCareerCard(career) {
+    const card = document.createElement('div');
+    card.className = 'career-card';
+    card.style.cursor = 'pointer';
+    card.dataset.careerId = career.id;
+    card.innerHTML = `
+        <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image" loading="lazy">` : ''}</div>
+        <h3>${career.name}</h3>
+    `;
+    return card;
 }
 
 /**
- * Cargar TODAS las carreras con todos sus datos
- * Se hace una sola llamada y se guarda en cache
- * OPTIMIZADO: Usa /api/careers/list que es más liviano (sin skills/jobs)
+ * Agrega carreras al grid (modo append para paginación)
  */
-async function loadAllCareersToCache() {
-    // Si ya hay cache válido, retornarlo
-    let cached = getCachedCareers();
-    if (cached) return cached;
-
-    // Si no hay cache, cargar desde API (endpoint más liviano)
-    console.log('Cargando carreras desde API...');
-    const response = await fetch('/api/careers/list');
-    const data = await response.json();
-
-    if (data.success) {
-        setCachedCareers(data);
-        return data;
-    }
-    
-    throw new Error(data.message || 'Error al cargar carreras');
-}
-
-async function refreshCareersInBackground(grid) {
-    try {
-        const response = await fetch('/api/careers/list');
-        const data = await response.json();
-
-        if (data.success) {
-            setCachedCareers(data);
-            renderCareers(grid, data.careers || []);
-        }
-    } catch (error) {
-        console.warn('No se pudo refrescar carreras en background:', error);
-    }
-}
-
-function renderCareers(grid, careers) {
-    grid.innerHTML = '';
-    
-    // Usar DocumentFragment para evitar 60 reflows
+function appendCareers(grid, careers) {
     const fragment = document.createDocumentFragment();
-
     for (const career of careers) {
-        const card = document.createElement('div');
-        card.className = 'career-card';
-        card.style.cursor = 'pointer';
-        card.dataset.careerId = career.id;  // Guardar ID en data attribute
-        card.innerHTML = `
-            <div class="career-icon">${career.url ? `<img src="${career.url}" alt="${career.name}" class="career-image" loading="lazy">` : ''}</div>
-            <h3>${career.name}</h3>
-        `;
-
-        fragment.appendChild(card);
+        fragment.appendChild(createCareerCard(career));
     }
+    grid.appendChild(fragment);
+}
 
-    grid.appendChild(fragment);  // Un solo reflow aquí
-
-    // Event delegation: un listener para todas las cards
+function setupEventDelegation(grid) {
+    // Click -> navegar a detalle
     grid.addEventListener('click', (e) => {
         const card = e.target.closest('.career-card');
         if (card) {
-            const careerId = card.dataset.careerId;
-            window.location.href = `/career-detail?id=${careerId}`;
+            window.location.href = `/career-detail?id=${card.dataset.careerId}`;
         }
     });
 
-    // Event delegation para transform hover
+    // Hover effect con event delegation
     grid.addEventListener('mouseenter', (e) => {
         const card = e.target.closest('.career-card');
         if (card) card.style.transform = 'translateY(-8px)';
@@ -139,40 +111,152 @@ function renderCareers(grid, careers) {
         const card = e.target.closest('.career-card');
         if (card) card.style.transform = 'translateY(0)';
     }, true);
+}
 
-    if (careers.length === 0) {
-        grid.innerHTML = '<p class="no-data">No hay carreras disponibles.</p>';
+// ─── Load More Button ───────────────────────────────────────
+
+function createLoadMoreButton() {
+    const container = document.querySelector('.careers-section .container');
+    if (!container) return;
+
+    // Remover botón anterior si existe
+    const existing = document.getElementById('load-more-btn');
+    if (existing) existing.remove();
+
+    const btn = document.createElement('button');
+    btn.id = 'load-more-btn';
+    btn.className = 'btn btn-primary';
+    btn.style.cssText = `
+        display: block;
+        margin: 2rem auto;
+        padding: 12px 40px;
+        font-size: 1.1em;
+        cursor: pointer;
+        background: #f3f9ff;
+        color: #4a4a4a;
+        border: 2px solid transparent;
+        background-image: linear-gradient(#f3f9ff, #f3f9ff),
+                          linear-gradient(90deg, rgba(143,191,224,0.25) 0%, rgba(168,214,206,0.25) 33%,
+                                                   rgba(186,231,221,0.25) 66%, rgba(205,236,226,0.25) 100%);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        box-shadow: 0 2px 6px rgba(60,60,60,0.12);
+        border-radius: 8px;
+    `;
+    btn.textContent = 'Cargar más carreras';
+    btn.addEventListener('click', loadMore);
+
+    container.appendChild(btn);
+}
+
+function updateLoadMoreButton() {
+    const btn = document.getElementById('load-more-btn');
+    if (!btn) return;
+
+    if (currentPage >= totalPages) {
+        btn.remove();
+    }
+}
+
+function setLoadMoreButtonLoading(isLoading) {
+    const btn = document.getElementById('load-more-btn');
+    if (!btn) return;
+    btn.disabled = isLoading;
+    btn.textContent = isLoading ? 'Cargando...' : 'Cargar más carreras';
+}
+
+// ─── Main Logic ─────────────────────────────────────────────
+
+async function loadMore() {
+    const grid = document.getElementById('careers-grid');
+    if (!grid) return;
+
+    setLoadMoreButtonLoading(true);
+
+    try {
+        const nextPage = currentPage + 1;
+        const data = await fetchCareersPage(nextPage);
+
+        currentPage = data.page;
+        totalPages = data.total_pages;
+
+        // Append nuevas carreras
+        appendCareers(grid, data.careers);
+
+        // Acumular para cache
+        accumulatedCareers = accumulatedCareers.concat(data.careers);
+        setCachedCareers(accumulatedCareers);
+
+        updateLoadMoreButton();
+    } catch (error) {
+        console.error('Error cargando más carreras:', error);
+        const btn = document.getElementById('load-more-btn');
+        if (btn) btn.textContent = 'Error al cargar. Reintentar';
+    } finally {
+        setLoadMoreButtonLoading(false);
     }
 }
 
 async function loadCareers() {
     const grid = document.getElementById('careers-grid');
-    const entry = getCacheEntry();
+    if (!grid) return;
 
-    // Render instantáneo si existe cache (aunque esté expirado)
-    if (entry?.data?.careers?.length) {
-        renderCareers(grid, entry.data.careers);
+    // 1. Intentar render desde cache (instantáneo)
+    const cachedCareers = getCachedCareers();
+    if (cachedCareers?.length) {
+        accumulatedCareers = cachedCareers;
+        grid.innerHTML = '';
+        appendCareers(grid, accumulatedCareers);
 
-        const isExpired = (Date.now() - entry.timestamp) >= CAREERS_CACHE_EXPIRY;
-        if (isExpired) {
-            refreshCareersInBackground(grid);
+        // Refrescar silenciosamente página 1 para datos frescos
+        setTimeout(async () => {
+            try {
+                const data = await fetchCareersPage(1);
+                // Solo reemplazar si hay datos nuevos o distintos
+                if (data.careers.length > 0) {
+                    currentPage = data.page;
+                    totalPages = data.total_pages;
+                }
+            } catch (e) {
+                // Silencioso - el cache ya muestra datos
+            }
+        }, 100);
+
+        // Mostrar botón si hay más páginas (asumimos más de 12 si ya tenemos muchas cacheadas)
+        if (accumulatedCareers.length >= PER_PAGE) {
+            createLoadMoreButton();
         }
+        setupEventDelegation(grid);
         return;
     }
 
+    // 2. Sin cache: mostrar loading y cargar página 1
     grid.innerHTML = '<p class="loading">Cargando carreras...</p>';
 
     try {
-        const data = await loadAllCareersToCache();
-        renderCareers(grid, data.careers || []);
+        const data = await fetchCareersPage(1);
 
+        currentPage = data.page;
+        totalPages = data.total_pages;
+        accumulatedCareers = [...data.careers];
+
+        grid.innerHTML = '';
+        appendCareers(grid, data.careers);
+        setCachedCareers(accumulatedCareers);
+        setupEventDelegation(grid);
+
+        if (currentPage < totalPages) {
+            createLoadMoreButton();
+        }
     } catch (error) {
         console.error('Error cargando carreras:', error);
-        grid.innerHTML = `<p class="error">Error al cargar las carreras. Intenta de nuevo más tarde.</p>`;
+        grid.innerHTML = '<p class="error">Error al cargar las carreras. Intenta de nuevo más tarde.</p>';
     }
 }
 
-// Cargar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', loadCareers);
+// ─── Init ───────────────────────────────────────────────────
 
-clearLegacyCaches();
+document.addEventListener('DOMContentLoaded', () => {
+    clearLegacyCaches();
+    loadCareers();
+});

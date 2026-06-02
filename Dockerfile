@@ -38,5 +38,8 @@ ENV PYTHONUNBUFFERED=1
 ENV DATABASE_PATH=/app/data/vocational_test.db
 
 # Comando para ejecutar la aplicación con Gunicorn
+# --preload: carga la app en el master antes de forkear workers (copy-on-write)
+#            reduce memoria ~25% y acelera startup de workers nuevos
+# --max-requests: recicla workers cada 1000 requests para prevenir memory leaks
 # 4 workers para ~5 usuarios concurrentes, 2 threads por worker
-CMD ["gunicorn", "--workers=4", "--threads=2", "--worker-class=gthread", "--bind=0.0.0.0:8000", "--timeout=30", "--access-logfile=-", "app:app"]
+CMD ["gunicorn", "--workers=4", "--threads=2", "--worker-class=gthread", "--preload", "--max-requests=1000", "--max-requests-jitter=100", "--bind=0.0.0.0:8000", "--timeout=30", "--access-logfile=-", "app:app"]

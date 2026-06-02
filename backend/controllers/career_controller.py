@@ -2,7 +2,7 @@
 Controlador para carreras
 """
 import logging
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from services.career_service import CareerService
 from utils.errors import NotFoundError
 
@@ -16,19 +16,22 @@ class CareerController:
     @staticmethod
     def get_careers_list():
         """
-        Endpoint GET /api/careers/list
-        Obtiene lista básica de carreras (id, nombre, icono, descripción)
-        Para la página de listado - más liviano
+        Endpoint GET /api/careers/list?page=1&per_page=12
+        Obtiene lista paginada de carreras (id, nombre, icono, descripción)
+        Para la página de listado - más liviano que /api/careers/all
         Cache: 1 hora en navegador
         """
         try:
-            careers = CareerService.get_careers_list()
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 12, type=int)
             
-            response = make_response(jsonify({
-                'success': True,
-                'careers': careers
-            }))
+            # Sanitizar parámetros
+            page = max(1, page)
+            per_page = max(1, min(per_page, 50))  # máximo 50 por página
             
+            result = CareerService.get_careers_list(page=page, per_page=per_page)
+            
+            response = make_response(jsonify(result))
             response.headers['Cache-Control'] = 'public, max-age=3600'
             return response
         except Exception as e:
